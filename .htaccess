@@ -1,0 +1,10 @@
+RewriteEngine on
+Rewritebase /cobros_dante/
+RewriteCond $1 !^(index\.php|static)
+RewriteRule ^(.*)$ index.php/$1 [L]
+Header add Access-Control-Allow-Origin: *
+<IfModule mod_headers.c>
+  Header set Cache-Control "no-cache, no-store, must-revalidate"
+  Header set Pragma "no-cache"
+  Header set Expires 0
+</IfModule>

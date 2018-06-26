@@ -1,0 +1,143 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/source/dante/!svn/ver/155/application/models
+END
+Concept.php
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/source/dante/!svn/ver/145/application/models/Concept.php
+END
+Course.php
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/source/dante/!svn/ver/64/application/models/Course.php
+END
+Inscription.php
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/source/dante/!svn/ver/72/application/models/Inscription.php
+END
+Ptype.php
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/source/dante/!svn/ver/145/application/models/Ptype.php
+END
+Detail.php
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/source/dante/!svn/ver/67/application/models/Detail.php
+END
+Country.php
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/source/dante/!svn/ver/145/application/models/Country.php
+END
+Amount.php
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/source/dante/!svn/ver/125/application/models/Amount.php
+END
+Creditcard.php
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/source/dante/!svn/ver/145/application/models/Creditcard.php
+END
+Scolarship.php
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/source/dante/!svn/ver/84/application/models/Scolarship.php
+END
+Level.php
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/source/dante/!svn/ver/145/application/models/Level.php
+END
+City.php
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/source/dante/!svn/ver/145/application/models/City.php
+END
+Bank.php
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/source/dante/!svn/ver/145/application/models/Bank.php
+END
+Payment.php
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/source/dante/!svn/ver/73/application/models/Payment.php
+END
+Tutor.php
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/source/dante/!svn/ver/155/application/models/Tutor.php
+END
+User.php
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/source/dante/!svn/ver/43/application/models/User.php
+END
+Debt.php
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/source/dante/!svn/ver/96/application/models/Debt.php
+END
+State.php
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/source/dante/!svn/ver/145/application/models/State.php
+END
+Family.php
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/source/dante/!svn/ver/72/application/models/Family.php
+END
+Modality.php
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/source/dante/!svn/ver/1/application/models/Modality.php
+END
+Pdetail.php
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/source/dante/!svn/ver/73/application/models/Pdetail.php
+END
+Division.php
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/source/dante/!svn/ver/145/application/models/Division.php
+END
+index.html
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/source/dante/!svn/ver/1/application/models/index.html
+END
+Student.php
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/source/dante/!svn/ver/155/application/models/Student.php
+END

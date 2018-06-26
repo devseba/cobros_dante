@@ -1,0 +1,66 @@
+<div class="pad">
+	<h2>Cursos <?=anchor('cursos/agregar', img('static/img/icon/sq_plus.png').' Agregar curso')?></h2>
+	<div id="filtros">
+		<form action="" method="post" id="f">
+			<?=img('static/img/icon/zoom.png')?>
+			<?=form_input(array('name' => 'curso', 'class' => 'tipns search', 'title' => 'Nombre del curso', 'autocomplete' => 'off', 'value'=>isset($filtros[0]) ? str_replace("%", "", $filtros[0]): ""))?>
+			<?=img('static/img/icon/filter.png')?>
+			<?$ps = array();
+				$ps[0] = 'Todos';
+				foreach($niveles as $p) $ps[$p->id] = $p->nivel;
+				echo form_dropdown('level_id',$ps,isset($filtros[2]) ? $filtros[2] : set_value('level_id'),'id="level" class="tipns" title="Filtrar por Nivel"')?>
+			<?=anchor('cursos',img('static/img/icon/delete.png'),'id="clean"')?>
+		</form>
+	</div>
+	<div id="results">
+		<?=$cursos?>
+		<div class="pagination">
+			<?=$pagination?>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	jQuery(document).ready(function(){
+		$('#filtros select').change(function(){
+			$('#results').html('<img src="/sgi/static/img/ui-anim_basic_16x16.gif" /> Buscando...');
+			$.ajax({
+				type: "POST",
+				url: "<?php echo site_url('cursos/filters'); ?>",
+				data: $('#filtros form').serialize(),
+				success: function(data){
+					$('#results').html(data);
+				}
+			});
+		})
+		
+		$('#clean').click(function(e){
+			e.preventDefault();
+			$(':input','#f')
+			.not(':button, :submit, :reset, :hidden')
+			.val('')
+			.removeAttr('checked')
+			.removeAttr('selected');
+			$('#results').html('<img src="/sgi/static/img/ui-anim_basic_16x16.gif" /> Buscando...');
+			$.ajax({
+				type: "POST",
+				url: "<?php echo site_url('cursos/filters'); ?>",
+				data: $('#filtros form').serialize(),
+				success: function(data){
+					$('#results').html(data);
+				}
+			});
+		})
+		
+		$('#filtros input').keyup(function(){
+			$('#results').html('<img src="/sgi/static/img/ui-anim_basic_16x16.gif" /> Buscando...');
+			$.ajax({
+				type: "POST",
+				url: "<?php echo site_url('cursos/filters'); ?>",
+				data: $('#filtros form').serialize(),
+				success: function(data){
+					$('#results').html(data);
+				}
+			});
+		})
+	});
+</script>

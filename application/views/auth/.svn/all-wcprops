@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/source/dante/!svn/ver/42/application/views/auth
+END
+reset.php
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/source/dante/!svn/ver/42/application/views/auth/reset.php
+END
+login.php
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/source/dante/!svn/ver/42/application/views/auth/login.php
+END
+recuperar.php
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/source/dante/!svn/ver/42/application/views/auth/recuperar.php
+END

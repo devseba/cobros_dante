@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/lib/adapters
+END
+OciAdapter.php
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/lib/adapters/OciAdapter.php
+END
+SqliteAdapter.php
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/lib/adapters/SqliteAdapter.php
+END
+MysqlAdapter.php
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/lib/adapters/MysqlAdapter.php
+END
+PgsqlAdapter.php
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/lib/adapters/PgsqlAdapter.php
+END

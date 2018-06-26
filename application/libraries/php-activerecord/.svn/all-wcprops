@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/source/dante/!svn/ver/82/application/libraries/php-activerecord
+END
+ActiveRecord.php
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/source/dante/!svn/ver/67/application/libraries/php-activerecord/ActiveRecord.php
+END
+LICENSE
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/LICENSE
+END
+.gitignore
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/.gitignore
+END
+CHANGELOG
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/CHANGELOG
+END
+README.md
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/README.md
+END

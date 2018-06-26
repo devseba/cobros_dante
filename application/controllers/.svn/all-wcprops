@@ -1,0 +1,137 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/source/dante/!svn/ver/160/application/controllers
+END
+conceptos.php
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/source/dante/!svn/ver/160/application/controllers/conceptos.php
+END
+auth.php
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/source/dante/!svn/ver/106/application/controllers/auth.php
+END
+importes.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/source/dante/!svn/ver/155/application/controllers/importes.php
+END
+backup.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/source/dante/!svn/ver/106/application/controllers/backup.php
+END
+tutores.php
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/source/dante/!svn/ver/155/application/controllers/tutores.php
+END
+niveles.php
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/source/dante/!svn/ver/150/application/controllers/niveles.php
+END
+deudas.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/source/dante/!svn/ver/158/application/controllers/deudas.php
+END
+bancos.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/source/dante/!svn/ver/141/application/controllers/bancos.php
+END
+inscripciones.php
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/source/dante/!svn/ver/155/application/controllers/inscripciones.php
+END
+pagos.php
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/source/dante/!svn/ver/160/application/controllers/pagos.php
+END
+usuarios.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/source/dante/!svn/ver/140/application/controllers/usuarios.php
+END
+descuentos.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/source/dante/!svn/ver/159/application/controllers/descuentos.php
+END
+divisiones.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/source/dante/!svn/ver/140/application/controllers/divisiones.php
+END
+provincias.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/source/dante/!svn/ver/140/application/controllers/provincias.php
+END
+tarjetas.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/source/dante/!svn/ver/141/application/controllers/tarjetas.php
+END
+alumnos.php
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/source/dante/!svn/ver/160/application/controllers/alumnos.php
+END
+cursos.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/source/dante/!svn/ver/150/application/controllers/cursos.php
+END
+ciudades.php
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/source/dante/!svn/ver/140/application/controllers/ciudades.php
+END
+cajas.php
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/source/dante/!svn/ver/158/application/controllers/cajas.php
+END
+paises.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/source/dante/!svn/ver/140/application/controllers/paises.php
+END
+index.html
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/source/dante/!svn/ver/1/application/controllers/index.html
+END
+ptypes.php
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/source/dante/!svn/ver/141/application/controllers/ptypes.php
+END

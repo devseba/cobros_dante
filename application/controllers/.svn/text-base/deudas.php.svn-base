@@ -1,0 +1,420 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Deudas extends CI_Controller {
+
+	function __construct()
+	{
+		parent::__construct();
+		if(!$this->session->userdata('id')) redirect('auth/login');
+		$this->load->helpers('date');
+	}
+
+	public function index($offset = 0){
+		if(!$offset)
+			$this->session->unset_userdata('filtros_deudas');
+			
+		$datos = $this->session->all_userdata();
+		
+		$estudiante = isset($datos['filtros_deudas']['estudiante'])?$datos['filtros_deudas']['estudiante']:'%%'; 
+		$tutor = isset($datos['filtros_deudas']['tutor'])?$datos['filtros_deudas']['tutor']:'%%'; 
+		$concepto = isset($datos['filtros_deudas']['concepto'])?$datos['filtros_deudas']['concepto']:0; 
+		$fecha_desde = isset($datos['filtros_deudas']['fecha_desde'])?$datos['filtros_deudas']['fecha_desde']:''; 
+		$fecha_hasta = isset($datos['filtros_deudas']['fecha_hasta'])?$datos['filtros_deudas']['fecha_hasta']:date('Y-m-d'); 
+		
+		$condiciones = 'pagado = ?';
+		$valores[] = 0;
+		
+		$cond = 'pagado = ?';
+		$val[] = 0;
+		
+		if($estudiante != '%%'){
+			if($condiciones!='')
+				$condiciones .= ' AND ';
+			$condiciones .= ' CONCAT_WS(" ",students.apellido, students.nombre) LIKE ?';
+			$valores['estudiante'] = $estudiante;
+		}
+		
+		if($tutor !== '%%'){
+			if($condiciones != ''){
+				$condiciones .= " AND ";
+			}
+			$condiciones .= ' (CONCAT_WS(" ",tutors.apellido, tutors.nombre) LIKE ? OR CONCAT_WS(" ",tutors.nombre, tutors.apellido) LIKE ? )';
+			$valores['tutor'] = $tutor;
+			$valores[] = $tutor;
+		}
+		
+		if($concepto > 0){
+			if($condiciones!=''){
+				$condiciones .= ' AND ';
+			}
+			
+			$condiciones .= ' concepts.id = ?';
+			$valores['concepto'] = $concepto;
+			
+			$cond .= ' concepts.id = ?';
+			$val[] = $concepto;
+			}
+		
+		if($fecha_desde != ''){
+			if($condiciones!='')
+				$condiciones .= ' AND ';
+			
+			$condiciones .= " fecha >= ? ";
+			$valores['fecha_desde'] = $fecha_desde;
+			
+			if($cond!='')
+				$cond .= ' AND ';
+			
+			$cond .= " fecha >= ? ";
+			$val[] = $fecha_desde;
+		}		
+			
+		if($fecha_hasta != ''){
+			$fecha_hasta = $fecha_hasta;
+		}
+		else
+			$fecha_hasta = date('Y-m-d');
+			
+		if($condiciones!='')
+			$condiciones .= ' AND ';
+		$condiciones .= " fecha <= ?";
+		$valores['fecha_hasta'] = $fecha_hasta;					
+		
+		if($cond!='')
+			$cond .= ' AND ';
+		$cond .= " fecha <= ?";
+		$val[] = $fecha_hasta;
+		
+		$conditions = array_merge(array($condiciones), $valores);
+		
+		$joins = 'INNER JOIN students ON students.id = debts.student_id
+				  INNER JOIN amounts ON amounts.id = debts.amount_id
+				  INNER JOIN concepts ON concepts.id = amounts.concept_id
+				  INNER JOIN families ON families.student_id = students.id
+				  INNER JOIN tutors ON tutors.id = families.tutor_id';
+		
+		$this->load->library('pagination');
+		$todos = Debt::all(array('joins'=>$joins,'conditions' => $conditions, 'group'=>'concepts.id, students.id'));
+		if(sizeof($todos)){
+			$config['base_url'] = site_url('deudas/index');
+			$config['total_rows'] = sizeof($todos);
+			$config['per_page'] = '20';  
+			$config['num_links'] = '2'; 
+			$config['first_link'] = '&larr; primero';
+			$config['last_link'] = 'último &rarr;';
+			$this->pagination->initialize($config);
+			
+			$deudas = Debt::find('all', array('joins'=>$joins, 'conditions'=>$conditions, 'group'=>'concepts.id, students.id', 'limit' => $config['per_page'], 'offset' => $offset, 'order'=>'amounts.course_id ASC,students.apellido asc, students.nombre asc, amounts.fecha asc'));
+			
+			$total_deuda = 0;
+			$students = array();
+			
+			foreach($todos as $e){
+				$students[] = $e->student_id;
+				}
+			
+			if($cond!='')
+				$cond .= ' AND ';
+			$cond .= " student_id IN (?)";
+			$val[] = array_unique($students);
+			
+			$condition = array_merge(array($cond),$val);
+			$deuda_filtros = Debt::find('all', array('select'=> 'IF(SUM(amounts.importe) IS NULL,0, SUM(amounts.importe)) AS deuda_total'
+													,'joins'=>'INNER JOIN amounts ON amounts.id = debts.amount_id', 'conditions'=>$condition));
+			
+			$this->table->set_heading('Fecha', 'Estudiante', 'Concepto','Curso','Importe');
+			foreach($deudas as $deuda){
+				$this->table->add_row(
+					$deuda->amount->fecha->format('d/m/Y'),
+					$deuda->student->apellido.' '.$deuda->student->nombre,
+					$deuda->amount->concept->concepto.' '.$deuda->amount->ciclo_lectivo,
+					$deuda->amount->course->course,
+					'$'.$deuda->amount->importe
+				);
+				$total_deuda += $deuda->amount->importe;
+			}
+			
+			$data['deudas'] = $this->table->generate();
+			$data['total_deuda'] = '<h3 align="right"><strong><em>El total de la deuda: $'.$deuda_filtros[0]->deuda_total.'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</em></strong></h3>';
+			$data['pagination'] = $this->pagination->create_links();
+		}
+		else{
+			$data['deudas'] = "No hay resultados a mostrar";
+			}
+		
+		$data['conceptos'] = Concept::all();		
+		$data['filtros']= $valores;
+		$this->session->set_flashdata('next',base_url('deudas'));
+		$this->template->write_view('content', 'deudas/index',$data);
+		$this->template->render();
+
+	}
+	
+	public function filters($offset = 0){
+		$estudiante = '%'.str_replace(' ', '%',$this->input->post('estudiante')).'%';
+		$tutor = '%'.str_replace(' ', '%',$this->input->post('tutor')).'%';
+		$fecha_desde = ($this->input->post('fecha_desde')!='')?mdate('%Y-%m-%d' ,normal_to_unix($this->input->post('fecha_desde'))):'';
+		$fecha_hasta = ($this->input->post('fecha_hasta')!='')?mdate('%Y-%m-%d' ,normal_to_unix($this->input->post('fecha_hasta'))):date('Y-m-d');
+		$concepto = $this->input->post('concepto_id');
+		
+		$condiciones = 'pagado = ?';
+		$valores[] = 0;
+		
+		$cond = 'pagado = ?';
+		$val[] = 0;
+		if($estudiante != '%%'){
+			if($condiciones!='')
+				$condiciones .= ' AND ';
+			$condiciones .= ' (CONCAT_WS(" ",students.apellido, students.nombre) LIKE ? OR CONCAT_WS(" ",students.nombre, students.apellido) LIKE ?)';
+			$valores['estudiante'] = $estudiante;
+			$valores[] = $estudiante;
+		}
+		
+		if($tutor !== '%%'){
+			if($condiciones != ''){
+				$condiciones .= " AND ";
+			}
+			$condiciones .= ' (CONCAT_WS(" ",tutors.apellido, tutors.nombre) LIKE ? OR CONCAT_WS(" ",tutors.nombre, tutors.apellido) LIKE ? )';
+			$valores['tutor'] = $tutor;
+			$valores[] = $tutor;
+		}
+		
+		if($concepto > 0){
+			if($condiciones!='')
+				$condiciones .= ' AND ';
+			$condiciones .= ' concepts.id = ?';
+			$valores['concepto'] = $concepto;
+			
+			if($cond!='')
+				$cond .= ' AND ';
+			$cond .= ' concept_id = ?';
+			$val[] = $concepto;
+			}
+		
+		if($fecha_desde != ''){
+			if($condiciones!='')
+				$condiciones .= ' AND ';
+			
+			$condiciones .= " fecha >= ? ";
+			$valores['fecha_desde'] = $fecha_desde;
+			
+			if($cond!='')
+				$cond .= ' AND ';
+			
+			$cond .= " fecha >= ? ";
+			$val[] = $fecha_desde;
+		}		
+			
+		if($fecha_hasta != ''){
+			$fecha_hasta = $fecha_hasta;
+		}
+		else
+			$fecha_hasta = date('Y-m-d');
+			
+		if($condiciones!='')
+			$condiciones .= ' AND ';
+		$condiciones .= " fecha <= ?";
+		$valores['fecha_hasta'] = $fecha_hasta;					
+		
+		if($cond!='')
+			$cond .= ' AND ';
+		$cond .= " fecha <= ?";
+		$val[] = $fecha_hasta;				
+		
+		$this->session->set_userdata('filtros_deudas', $valores);
+		
+		$conditions = array_merge(array($condiciones), $valores);
+		
+		$joins = 'INNER JOIN students ON students.id = debts.student_id
+				  INNER JOIN amounts ON amounts.id = debts.amount_id
+				  INNER JOIN concepts ON concepts.id = amounts.concept_id
+				  INNER JOIN families ON families.student_id = students.id
+				  INNER JOIN tutors ON tutors.id = families.tutor_id';
+		
+		
+		$todos = Debt::all(array('joins'=>$joins,'conditions' => $conditions, 'group'=>'concepts.id, students.id'));
+		if(sizeof($todos)){
+			$config['base_url'] = site_url('deudas/index');
+			$config['total_rows'] = sizeof($todos);
+			$config['per_page'] = '20';  
+			$config['num_links'] = '2'; 
+			$config['first_link'] = '&larr; primero';
+			$config['last_link'] = 'último &rarr;';
+			$this->load->library('pagination', $config);
+			
+			$deudas = array();
+			$deudas = Debt::all(array('joins'=>$joins,'conditions' => $conditions, 'order'=>'amounts.course_id ASC, students.apellido asc, students.nombre asc, amounts.fecha asc', 'group'=>'concepts.id, students.id','limit' => $config['per_page'], 'offset' => $offset) );
+			
+			$students = array();
+			
+			foreach($todos as $e){
+				$students[] = $e->student_id;
+				}
+			
+			if($cond!='')
+				$cond .= ' AND ';
+			$cond .= " student_id IN (?)";
+			$val[] = array_unique($students);
+			
+			$condition = array_merge(array($cond),$val);
+			$deuda_filtros = Debt::find('all', array('select'=> 'IF(SUM(amounts.importe) IS NULL,0, SUM(amounts.importe)) AS deuda_total'
+													,'joins'=>'INNER JOIN amounts ON amounts.id = debts.amount_id', 'conditions'=>$condition));
+			
+			$total_deuda = 0;
+			$this->table->set_heading('Fecha', 'Estudiante', 'Concepto','Curso','Importe');
+			foreach($deudas as $deuda){
+				$this->table->add_row(
+					$deuda->amount->fecha->format('d/m/Y'),
+					$deuda->student->apellido.' '.$deuda->student->nombre,
+					$deuda->amount->concept->concepto.' '.$deuda->amount->ciclo_lectivo,
+					$deuda->amount->course->course,
+					'$'.$deuda->amount->importe
+				);
+				$total_deuda += $deuda->amount->importe;
+			}
+
+			$this->session->set_flashdata('next',$this->agent->referrer());
+			echo $this->table->generate();
+			echo '<h3 align="right"><strong><em>El total de la deuda: $'.$deuda_filtros[0]->deuda_total.'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;</em></strong></h3>';
+			echo '<div class="pagination">';
+			echo $this->pagination->create_links();
+			echo '</div>';
+		}
+		else{
+			echo "No hay resultados a mostrar";
+			}
+	}
+	
+	public function reporte(){
+		$estudiante = '%'.str_replace(' ', '%',$this->input->post('estudiante')).'%';
+		$tutor = '%'.str_replace(' ', '%',$this->input->post('tutor')).'%';
+		$fecha_desde = ($this->input->post('fecha_desde')!='')?mdate('%Y-%m-%d' ,normal_to_unix($this->input->post('fecha_desde'))):'';
+		$fecha_hasta = ($this->input->post('fecha_hasta')!='')?mdate('%Y-%m-%d' ,normal_to_unix($this->input->post('fecha_hasta'))):date('Y-m-d');
+		$concepto = $this->input->post('concepto_id');
+		
+		$condiciones = 'pagado = ?';
+		$valores[] = 0;
+		
+		$cond = 'pagado = ?';
+		$val[] = 0;
+		if($estudiante != '%%'){
+			if($condiciones!='')
+				$condiciones .= ' AND ';
+			$condiciones .= ' (CONCAT_WS(" ",students.apellido, students.nombre) LIKE ? OR CONCAT_WS(" ",students.nombre, students.apellido) LIKE ?)';
+			$valores['estudiante'] = $estudiante;
+			$valores[] = $estudiante;
+		}
+		
+		if($tutor !== '%%'){
+			if($condiciones != ''){
+				$condiciones .= " AND ";
+			}
+			$condiciones .= ' (CONCAT_WS(" ",tutors.apellido, tutors.nombre) LIKE ? OR CONCAT_WS(" ",tutors.nombre, tutors.apellido) LIKE ? )';
+			$valores['tutor'] = $tutor;
+			$valores[] = $tutor;
+		}
+		
+		if($concepto > 0){
+			if($condiciones!='')
+				$condiciones .= ' AND ';
+			$condiciones .= ' concepts.id = ?';
+			$valores['concepto'] = $concepto;
+			
+			if($cond!='')
+				$cond .= ' AND ';
+			$cond .= ' concept_id = ?';
+			$val[] = $concepto;
+			}
+		
+		if($fecha_desde != ''){
+			if($condiciones!='')
+				$condiciones .= ' AND ';
+			
+			$condiciones .= " fecha >= ? ";
+			$valores['fecha_desde'] = $fecha_desde;
+			
+			if($cond!='')
+				$cond .= ' AND ';
+			
+			$cond .= " fecha >= ? ";
+			$val[] = $fecha_desde;
+		}		
+			
+		if($fecha_hasta != ''){
+			$fecha_hasta = $fecha_hasta;
+		}
+		else
+			$fecha_hasta = date('Y-m-d');
+			
+		if($condiciones!='')
+			$condiciones .= ' AND ';
+		$condiciones .= " fecha <= ?";
+		$valores['fecha_hasta'] = $fecha_hasta;					
+		
+		if($cond!='')
+			$cond .= ' AND ';
+		$cond .= " fecha <= ?";
+		$val[] = $fecha_hasta;				
+		
+		$this->session->set_userdata('filtros_deudas', $valores);
+		
+		$conditions = array_merge(array($condiciones), $valores);
+		
+		$joins = 'INNER JOIN students ON students.id = debts.student_id
+				  INNER JOIN amounts ON amounts.id = debts.amount_id
+				  INNER JOIN concepts ON concepts.id = amounts.concept_id
+				  INNER JOIN families ON families.student_id = students.id
+				  INNER JOIN tutors ON tutors.id = families.tutor_id';
+		
+		
+		$todos = Debt::all(array('joins'=>$joins,'conditions' => $conditions, 'group'=>'concepts.id, students.id'));
+		if(sizeof($todos)){
+			$deudas = array();
+			$deudas = Debt::all(array('joins'=>$joins,'conditions' => $conditions, 'order'=>'amounts.course_id ASC, students.apellido asc, students.nombre asc, amounts.fecha asc', 'group'=>'concepts.id, students.id') );
+			
+			$students = array();
+			
+			foreach($todos as $e){
+				$students[] = $e->student_id;
+				}
+			
+			if($cond!='')
+				$cond .= ' AND ';
+			$cond .= " student_id IN (?)";
+			$val[] = array_unique($students);
+			
+			$condition = array_merge(array($cond),$val);
+			$deuda_filtros = Debt::find('all', array('select'=> 'IF(SUM(amounts.importe) IS NULL,0, SUM(amounts.importe)) AS deuda_total'
+													,'joins'=>'INNER JOIN amounts ON amounts.id = debts.amount_id', 'conditions'=>$condition));
+			
+			$total_deuda = 0;
+			$this->table->set_heading('Fecha', 'Estudiante', 'Concepto','Curso','Importe');
+			foreach($deudas as $deuda){
+				$this->table->add_row(
+					$deuda->amount->fecha->format('d/m/Y'),
+					$deuda->student->apellido.' '.$deuda->student->nombre,
+					$deuda->amount->concept->concepto.' '.$deuda->amount->ciclo_lectivo,
+					$deuda->amount->course->course,
+					'$'.$deuda->amount->importe
+				);
+				$total_deuda += $deuda->amount->importe;
+			}
+			
+			$data['titulo'] = "Reporte de deudas";
+			$data['reporte'] = $this->table->generate();
+		
+			$this->session->set_flashdata('next',$this->agent->referrer());
+			$this->template->set_template('reporte');
+			$this->template->write_view('content', 'pagos/reporte',$data);
+			$this->template->render();
+		}
+	}
+	
+	function agregar(){
+		redirect('deudas');
+	}
+	
+	function eliminar($id){
+		redirect('deudas');
+	}
+}

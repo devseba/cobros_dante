@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/examples/orders/models
+END
+Order.php
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/examples/orders/models/Order.php
+END
+Payment.php
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/examples/orders/models/Payment.php
+END
+Person.php
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/examples/orders/models/Person.php
+END

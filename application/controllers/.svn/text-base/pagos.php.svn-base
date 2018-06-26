@@ -1,0 +1,572 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Pagos extends CI_Controller {
+
+	function __construct(){
+		parent::__construct();
+		if(!$this->session->userdata('id')) redirect('auth/login');
+	}
+
+	public function index($offset = 0){
+		$this->load->helpers('date');
+		
+		if(!$offset)
+			$this->session->unset_userdata('filtros_pagos');
+			
+		$datos = $this->session->all_userdata();
+				
+		$string = isset($datos['filtros_pagos']['estudiante'])?$datos['filtros_pagos']['estudiante']:'%%'; 
+		$usuario = isset($datos['filtros_pagos']['usuario'])?$datos['filtros_pagos']['usuario']:0;
+		$fecha_desde = isset($datos['filtros_pagos']['fecha_desde'])?$datos['filtros_pagos']['fecha_desde']:'';
+		$fecha_hasta = isset($datos['filtros_pagos']['fecha_hasta'])?$datos['filtros_pagos']['fecha_hasta']:date('Y-m-d');
+		
+		$condiciones = 'anulado = ?';
+		$valores['anulado'] = isset($datos['filtros_pagos']['anulado'])?$datos['filtros_pagos']['anulado']:0;
+		
+		if($string != '%%'){
+			$condiciones .= ' AND (CONCAT_WS(" ",students.apellido, students.nombre) LIKE ? OR CONCAT_WS(" ",students.nombre, students.apellido) LIKE ? ';
+			$condiciones .= " OR payments.nro_comprobante LIKE ? )";
+			$valores['estudiante'] = $string;
+			$valores[] = $string;
+			$valores[] = $string;
+		}
+		
+		if($usuario > 0){
+			$condiciones .= " AND user_id = ?";
+			$valores['usuario'] = $usuario;
+		}
+		
+		if($fecha_desde != ''){
+			$fecha_desde = $fecha_desde;
+					
+			if($fecha_hasta != ''){
+				$fecha_hasta = $fecha_hasta;
+			}
+			else
+				$fecha_hasta = date('Y-m-d');
+			
+			$condiciones .= " AND fecha BETWEEN ? AND ?";
+			$valores['fecha_desde'] = $fecha_desde;
+			$valores['fecha_hasta'] = $fecha_hasta;			
+		
+		}
+		
+		$conditions = array_merge(array($condiciones), $valores);
+		
+		$config['base_url'] = site_url('pagos/index');
+		$config['total_rows'] = Payment::count(array('joins'=>array('student'),'conditions' => $conditions));
+		$config['per_page'] = '20'; 
+		$config['num_links'] = '2'; 
+		$config['first_link'] = '&larr; primero';
+		$config['last_link'] = 'último &rarr;';
+		$this->load->library('pagination', $config);
+		
+		$pagos = array();
+		$pagos = Payment::all(array('joins'=>array('student'),
+									'conditions' => $conditions, 
+									'limit' => $config['per_page'], 
+									'offset' => $offset
+									) 
+								);
+		
+		$this->table->set_heading('Fecha','Nro Comprobante', 'Estudiante', 'Importe','Usuario','Acciones');
+		
+		$atts = array(
+					  'width'      => '800',
+					  'height'     => '600',
+					  'scrollbars' => 'yes',
+					  'status'     => 'yes',
+					  'resizable'  => 'yes',
+					  'screenx'    => '0',
+					  'screeny'    => '0'
+		);
+		
+		foreach($pagos as $pago){
+			$this->table->add_row(
+				$pago->fecha->format('d/m/Y'),
+				$pago->nro_comprobante,
+				$pago->student->apellido.' '.$pago->student->nombre,
+				'$'.$pago->importe,
+				$pago->user->apellido.' '.$pago->user->nombre,
+				anchor_popup('pagos/ver/'.$pago->id, img('static/img/icon/info.png'),array(
+					  'width'      => '850',
+					  'height'     => '500',
+					  'scrollbars' => 'yes',
+					  'status'     => 'yes',
+					  'resizable'  => 'yes',
+					  'screenx'    => '0',
+					  'screeny'    => '0'
+		), 'class="tipwe" title="Ver Detalle"').' '.
+				anchor_popup('pagos/recibo/'.$pago->id,img('static/img/icon/print.png'), $atts,'class="tipwe" title="Imprimir comprobante de pago"').' '.
+				anchor('pagos/eliminar/'.$pago->id,img('static/img/icon/trash.png'), 'class="tipwe eliminar" title="Eliminar pago"')
+			);
+		}
+		
+		$data['pagos'] = $this->table->generate();
+		$data['usuarios'] = User::all();
+		$data['filtros'] = $valores;
+		$data['pagination'] = $this->pagination->create_links();
+		
+		$this->session->set_flashdata('next',current_url());
+		$this->template->write_view('content', 'pagos/index',$data);
+		$this->template->render();
+	}
+	
+	public function filters($offset = 0){
+		$this->load->helpers('date');
+		$string = '%'.str_replace(' ', '%', $this->input->post('estudiante')).'%';
+		$usuario = $this->input->post('user_id');
+		$fecha_desde = $this->input->post('fecha_desde');
+		$fecha_hasta = $this->input->post('fecha_hasta');
+		
+		$condiciones = 'anulado = ?';
+		$valores['anulado'] = $this->input->post('anulado');
+		
+		if($string != '%%'){
+			$condiciones .= ' AND (CONCAT_WS(" ",students.apellido, students.nombre) LIKE ? OR CONCAT_WS(" ",students.nombre, students.apellido) LIKE ? ';
+			$condiciones .= " OR payments.nro_comprobante LIKE ? )";
+			$valores['estudiante'] = $string;
+			$valores[] = $string;
+			$valores[] = $string;
+		}
+		
+		if($usuario > 0){
+			$condiciones .= " AND user_id = ?";
+			$valores['usuario'] = $usuario;
+		}
+		
+		if($fecha_desde != ''){
+			$fecha_desde = mdate('%Y-%m-%d' ,normal_to_unix($fecha_desde));
+					
+			if($fecha_hasta != ''){
+				$fecha_hasta = mdate('%Y-%m-%d' ,normal_to_unix($fecha_hasta));
+			}
+			else
+				$fecha_hasta = date('Y-m-d');
+			
+			$condiciones .= " AND fecha BETWEEN ? AND ?";
+			$valores['fecha_desde'] = $fecha_desde;
+			$valores['fecha_hasta'] = $fecha_hasta;			
+		
+		}
+		
+		$this->session->set_userdata('filtros_pagos', $valores);
+		
+		$conditions = array_merge(array($condiciones), $valores);
+		
+		$config['base_url'] = site_url('pagos/index');
+		$config['total_rows'] = Payment::count(array('joins'=>array('student'),'conditions' => $conditions));
+		$config['per_page'] = '20'; 
+		$config['num_links'] = '2'; 
+		$config['first_link'] = '&larr; primero';
+		$config['last_link'] = 'último &rarr;';
+		$this->load->library('pagination', $config);
+		
+		$pagos = array();
+		$pagos = Payment::all(array('joins'=>array('student'),
+									'conditions' => $conditions, 
+									'limit' => $config['per_page'], 
+									'offset' => $offset
+									)
+								);
+		
+		$this->table->set_heading('Fecha','Nro Comprobante', 'Estudiante', 'Importe','Usuario','Acciones');
+		
+		$atts = array(
+					  'width'      => '800',
+					  'height'     => '600',
+					  'scrollbars' => 'yes',
+					  'status'     => 'yes',
+					  'resizable'  => 'yes',
+					  'screenx'    => '0',
+					  'screeny'    => '0'
+		);
+		
+		foreach($pagos as $pago){
+			$this->table->add_row(
+				$pago->fecha->format('d/m/Y'),
+				$pago->nro_comprobante,
+				$pago->student->apellido.' '.$pago->student->nombre,
+				'$'.$pago->importe,
+				$pago->user->apellido.' '.$pago->user->nombre,
+				anchor_popup('pagos/ver/'.$pago->id, img('static/img/icon/info.png'),array(
+					  'width'      => '850',
+					  'height'     => '500',
+					  'scrollbars' => 'yes',
+					  'status'     => 'yes',
+					  'resizable'  => 'yes',
+					  'screenx'    => '0',
+					  'screeny'    => '0'
+		), 'class="tipwe" title="Ver Detalle"').' '.
+				anchor_popup('pagos/recibo/'.$pago->id,img('static/img/icon/print.png'), $atts,'class="tipwe" title="Imprimir comprobante de pago"').' '.
+				anchor('pagos/eliminar/'.$pago->id,img('static/img/icon/trash.png'), 'class="tipwe eliminar" title="Eliminar pago"')
+			);
+		}
+
+		$this->session->set_flashdata('next',base_url('pagos'));				
+		echo $this->table->generate();
+		echo '<div class="pagination">';
+		echo $this->pagination->create_links();
+		echo '</div>';
+	}
+	
+	public function reporte()
+	{
+		$this->load->helpers('date');
+		$string = '%'.str_replace(' ', '%', $this->input->post('estudiante')).'%';
+		$usuario = $this->input->post('user_id');
+		$fecha_desde = $this->input->post('fecha_desde');
+		$fecha_hasta = $this->input->post('fecha_hasta');
+		
+		$condiciones = 'anulado = ?';
+		$valores['anulado'] = $this->input->post('anulado');
+		
+		if($string != '%%'){
+			$condiciones .= ' AND (CONCAT_WS(" ",students.apellido, students.nombre) LIKE ? OR CONCAT_WS(" ",students.nombre, students.apellido) LIKE ? ';
+			$condiciones .= " OR payments.nro_comprobante LIKE ? )";
+			$valores['estudiante'] = $string;
+			$valores[] = $string;
+			$valores[] = $string;
+		}
+		
+		if($usuario > 0){
+			$condiciones .= " AND user_id = ?";
+			$valores['usuario'] = $usuario;
+		}
+		
+		if($fecha_desde != ''){
+			$fecha_desde = mdate('%Y-%m-%d' ,normal_to_unix($fecha_desde));
+					
+			if($fecha_hasta != ''){
+				$fecha_hasta = mdate('%Y-%m-%d' ,normal_to_unix($fecha_hasta));
+			}
+			else
+				$fecha_hasta = date('Y-m-d');
+			
+			$condiciones .= " AND fecha BETWEEN ? AND ?";
+			$valores['fecha_desde'] = $fecha_desde;
+			$valores['fecha_hasta'] = $fecha_hasta;			
+		
+		}
+		
+		$this->session->set_userdata('filtros_pagos', $valores);
+		
+		$conditions = array_merge(array($condiciones), $valores);
+		
+		$pagos = array();
+		$pagos = Payment::all(array('joins'=>array('student'),
+									'conditions' => $conditions
+									)
+								);
+		
+		$this->table->set_heading('Fecha','Nro Comprobante', 'Estudiante', 'Importe','Usuario');
+		
+		foreach($pagos as $pago){
+			$this->table->add_row(
+				$pago->fecha->format('d/m/Y'),
+				$pago->nro_comprobante,
+				$pago->student->apellido.' '.$pago->student->nombre,
+				'$'.$pago->importe,
+				$pago->user->apellido.' '.$pago->user->nombre
+				);
+		}
+		
+		$data['titulo'] = "Reporte de pagos";
+		$data['reporte'] = $this->table->generate();
+		
+		$this->session->set_flashdata('next',$this->agent->referrer());
+		$this->template->set_template('reporte');
+		$this->template->write_view('content', 'pagos/reporte',$data);
+		$this->template->render();
+	}
+	
+	function historial($student_id, $offset = 0){
+		$this->load->library('pagination');
+		$config['base_url'] = site_url('historial/'.$student_id.'/');
+		$config['total_rows'] = Payment::count(array('conditions' => array('student_id = ?', $student_id)));
+		$config['per_page'] = '20';  
+		$config['num_links'] = '1'; 
+		$config['first_link'] = '&larr; primero';
+		$config['last_link'] = 'último &rarr;';
+		$this->pagination->initialize($config);
+		
+		$h = Payment::find('all', array('conditions' => array('student_id = ?', $student_id), 'limit' => $config['per_page'], 'offset' => $offset));
+		
+		$this->table->set_heading('# Pago','Concepto','Fecha de pago','Importe','Anulado', 'Cobrador', 'Acciones');
+			foreach($h as $p){
+				foreach($p->detail as $d){
+					$this->table->add_row(
+						$p->id,
+						$d->debt->amount->concept->concepto.' '.$d->debt->amount->ciclo_lectivo,
+						$p->fecha->format('d/m/Y H:i a'),
+						'$'.$d->importe,
+						$p->anulado ? 'Si ('.$p->fecha_anulado->format('d/m/Y').')' : 'No',
+						$p->user->apellido.', '.$p->user->nombre,
+						anchor('alumnos/recibos/',img('static/img/icon/print.png'), 'class="tipwe" title="Imprimir recibo"').' '.anchor('alumnos/recibos/',img('static/img/icon/trash.png'), 'class="tipwe eliminar" title="Anular pago"')
+					);
+				}
+			}
+		$data['a'] = Student::find_by_id($student_id);
+		$data['pagos'] = $this->table->generate();
+		$data['pagination'] = $this->pagination->create_links();
+		
+		$this->template->write_view('content', 'pagos/historial',$data);
+		$this->template->render();
+	}
+	
+	function agregar(){
+		$datos = $this->session->userdata('pago');
+		$insert = array_merge($datos, $_POST);
+		$insert['moneda']=isset($insert['moneda'])?$insert['moneda']:1; //Pesos
+		$i = Payment::connection();
+		try{
+			$i->transaction();
+			$insert['user_id'] = $this->session->userdata('id');
+			$insert['fecha'] = date('Y-m-d H:i:s');
+			Payment::create(
+				elements( array(
+					'student_id',
+					'user_id',
+					'nro_comprobante',
+					'fecha',
+					'moneda',
+					'importe'
+				), $insert )
+			);
+			$pagoid = $i->insert_id();
+		
+			foreach($insert['parcial'] as $k => $v){
+				$detalle = array('debt_id' => $k, 'payment_id' => $pagoid , 'importe' => $v);
+				$d = new Detail($detalle);
+				
+				if($d->is_valid()){
+					$d->save();
+				}
+				
+				$deu = Debt::find($k);
+				if($deu->amount->concept_id!=2){
+					if($insert['saldo'][$k]==$v){
+						$deu->pagado = 1;
+						$deu->importe = $deu->amount->importe;
+						$deu->save();
+					}
+				}				
+			}
+		
+			
+			foreach($insert['ptype_id'] as $k=>$v){
+				$det = array(
+								'payment_id'=>$pagoid,
+								'ptype_id'=>$v,
+								'creditcard_id'=>$insert['bank_id'][$k],
+								'bank_id'=>$insert['creditcard_id'][$k],
+								'importe'=>$insert['subimporte'][$k],
+								'vencimiento'=>$insert['vencimiento'][$k],
+								'nro_comprobante'=>$insert['comprobante'][$k],
+								'cuotas'=>$insert['cuotas'][$k],
+								'observaciones'=>$insert['observaciones'][$k]);
+				$pdetail = new Pdetail($det);
+				if( $pdetail->is_valid( ) ){
+					$suma = Pdetail::find(
+						array(
+							'select' => 'sum(importe) as importe',
+							'conditions' => array('payment_id = ?',$pagoid)
+						)
+					);
+					
+					$pago = Payment::find($pagoid);
+					
+					if(($suma->importe + $det['importe']) <= $pago->importe){
+						$pdetail->save();
+					}
+												
+				}
+			}			
+		
+			$this->session->set_flashdata('msg','<div class="success">El pago se realizó correctamente.</div>');
+			$i->commit();
+			
+			$this->session->unset_userdata('pago');
+						
+			$this->session->set_userdata('next',$this->agent->referrer());
+			$this->session->set_flashdata('next',base_url().'alumnos/ver/'.$insert['student_id']);
+			redirect('pagos/recibo/'.$pago->id);
+		}
+		catch (\Exception $e){
+			print_r($e);
+			$i->rollback();
+			$this->session->set_flashdata('msg','<div class="error">Hubo un error al realizar el pago.</div>');
+			$this->session->unset_userdata('pago');
+			redirect('alumnos/ver/'.$insert['student_id']);
+		}
+	}
+	
+	function pago_eventual($student,$course,$inscription){
+		if($_POST){
+			$i = Payment::connection();
+			try{
+				$i->transaction();
+				
+				if( ! Concept::exists(array('concepto'  => $this->input->post('concepto')))){
+					$c = Concept::create(array('concepto' => $this->input->post('concepto')));
+				}
+				else{
+					$c = Concept::find_by_concepto($this->input->post('concepto'));
+				}
+				$c = $c->id;
+				
+				$a = Amount::create(array(
+					'concept_id' => $c,
+					'importe' => $this->input->post('importe'),
+					'course_id' => $course,
+					'ciclo_lectivo' => date('Y'),
+					'fecha' => date('Y-m-d'),
+					'pago_eventual' => 1
+				));
+				$a = $a->id;
+				
+				$d = Debt::create(array(
+					'student_id' => $student,
+					'amount_id' => $a,
+					'inscription_id' => $inscription,
+					'pagado' => $this->input->post('pagado'),
+				));
+				$d = $d->id;
+				
+				if($this->input->post('pagado')){
+					$p = Payment::create(array(
+						'student_id' => $student,
+						'user_id' => $this->session->userdata('id'),
+						'importe' => $this->input->post('importe'),
+						'fecha' => date('Y-m-d H:i:s'),
+						'nro_comprobante' => $this->input->post('nro_comprobante')
+					));
+					$p = $p->id;
+					
+					$dt = Detail::create(array(
+						'debt_id' => $d,
+						'payment_id' => $p,
+						'importe' => $this->input->post('importe')
+					));
+					
+					$pd = Pdetail::create(array(
+						'ptype_id' => 1,
+						'payment_id' => $p,
+						'importe' => $this->input->post('importe'),
+						'nro_comprobante' => $this->input->post('nro_comprobante'),
+						'observaciones' => "Pago eventual"
+					));
+				}
+				$i->commit();
+				$this->session->set_flashdata('msg','<div class="success">El pago se realizó correctamente.</div>');
+			}
+			catch (\Exception $e){
+				$i->rollback();
+				$this->session->set_flashdata('msg','<div class="error">Hubo un error al realizar el pago.</div>');
+			}
+			redirect('alumnos/ver/'.$student);
+		}
+		
+		$nro = Payment::find('last');
+			
+		$data['nro_comprobante'] = '0001-00000000';
+		if($nro){
+			$nuevo = explode('-',$nro->nro_comprobante);
+			$data['nro_comprobante'] = $nuevo[0].'-'.str_pad(($nuevo[1] + 1), 8, '0', STR_PAD_LEFT);
+		}
+		
+		$data['titulo'] = "Pago eventual";
+		$this->template->write_view('content','pagos/eventual', $data);
+		$this->template->render();
+	}
+	
+	function recibo($pagoid){
+		
+		$data['pago'] = Payment::find($pagoid);
+		$cd = array('conditions' => array('payment_id = ?', $pagoid));
+		$data['detalles'] = Detail::all($cd);
+		$data['student'] = Student::find($data['pago']->student_id);
+		$ci = array('conditions' => array('student_id = ?', $data['student']->id));
+		$data['inscripto'] = Inscription::find($ci);
+		
+		$this->load->library('table');
+		
+		$this->table->set_heading('CONCEPTO','VENCIMIENTO','IMPORTE','DESCUENTO','PAGADO');
+		$t = 0;
+		foreach($data['detalles'] as $d){
+			$desc = Scolarship::first(array('conditions' => array('amount_id = ? AND student_id = ?', $d->debt->amount_id,$d->debt->student_id)));
+			
+			$this->table->add_row(
+				$d->debt->amount->concept->concepto.' '.$d->debt->amount->ciclo_lectivo,
+				$d->debt->amount->fecha->format('d/m/Y'),
+				'$'.$d->debt->amount->importe,
+				(isset($desc))?$desc->porcien_descuento.' %':'',
+				'$'.$d->importe
+			);
+			$t += $d->importe;
+		}
+		
+		$cell = array('data' => '<strong>TOTAL</strong>', 'colspan' => 4);
+		$this->table->add_row($cell, '$'.$t);
+		$data['tabla'] = $this->table->generate();
+		
+		$this->template->set_template('recibo');
+		$this->template->write_view('content', 'pagos/recibo',$data);
+		$this->template->render();
+	}
+	
+	function ver($pagoid){
+		$data['pago'] = Payment::find($pagoid);
+		$cd = array('conditions' => array('payment_id = ?', $pagoid));
+		$data['detalles'] = Detail::all($cd);
+		$data['student'] = Student::find($data['pago']->student_id);
+		$ci = array('conditions' => array('student_id = ?', $data['student']->id));
+		$data['inscripto'] = Inscription::find($ci);
+		
+		$this->load->library('table');
+		
+		$this->table->set_heading('Concepto','Vencimiento','Importe','Descuento','Pagado');
+		foreach($data['detalles'] as $d){
+			$desc = Scolarship::first(array('conditions' => array('amount_id = ? AND student_id = ?', $d->debt->amount_id,$d->debt->student_id)));
+			
+			$this->table->add_row(
+				$d->debt->amount->concept->concepto.' '.$d->debt->amount->ciclo_lectivo,
+				$d->debt->amount->fecha->format('d/m/Y'),
+				'$'.$d->debt->amount->importe,
+				(isset($desc))?$desc->porcien_descuento.' %':'',
+				'$'.$d->importe
+			);
+		}
+		
+		$data['tabla'] = $this->table->generate();
+		
+		$this->template->set_template('detalle');
+		$this->template->write_view('content', 'pagos/ver',$data);
+		$this->template->render();
+	}
+	
+	function eliminar($id){
+		try{
+			$a = Payment::find($id);
+			$a->user_id = $this->session->userdata('id');
+			$a->anulado = 1;
+			$a->fecha_anulado = date('Y-m-d');
+			foreach($a->debt as $d){
+				$d->pagado = 0;
+				$d->save();
+			}
+			$a->save();
+			$this->session->set_flashdata('msg','<div class="success">El pago fué anulado.</div>');
+		}
+		catch( \Exception $e){
+			$this->session->set_flashdata('msg','<div class="error">El pago no fué anulado.</div>');
+			}
+			
+		if ($this->agent->is_referral()){
+			$str = $this->agent->referrer();
+			$desde = strlen(base_url());
+			redirect(substr($str,$desde));
+		}
+		redirect('pagos');
+	}
+}

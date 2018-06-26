@@ -1,0 +1,173 @@
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test
+END
+ConnectionManagerTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ConnectionManagerTest.php
+END
+AllTests.php
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/AllTests.php
+END
+DateTimeTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/DateTimeTest.php
+END
+CallbackTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/CallbackTest.php
+END
+ColumnTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ColumnTest.php
+END
+ConnectionTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ConnectionTest.php
+END
+UtilsTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/UtilsTest.php
+END
+RelationshipTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/RelationshipTest.php
+END
+SqliteAdapterTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/SqliteAdapterTest.php
+END
+ValidatesInclusionAndExclusionOfTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ValidatesInclusionAndExclusionOfTest.php
+END
+ValidatesLengthOfTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ValidatesLengthOfTest.php
+END
+ConfigTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ConfigTest.php
+END
+SQLBuilderTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/SQLBuilderTest.php
+END
+MysqlAdapterTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/MysqlAdapterTest.php
+END
+AllValidationsTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/AllValidationsTest.php
+END
+ActiveRecordTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ActiveRecordTest.php
+END
+ValidatesFormatOfTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ValidatesFormatOfTest.php
+END
+OciAdapterTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/OciAdapterTest.php
+END
+ActiveRecordFindTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ActiveRecordFindTest.php
+END
+ModelCallbackTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ModelCallbackTest.php
+END
+SerializationTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/SerializationTest.php
+END
+ValidationsTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ValidationsTest.php
+END
+ExpressionsTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ExpressionsTest.php
+END
+InflectorTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/InflectorTest.php
+END
+ActiveRecordWriteTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ActiveRecordWriteTest.php
+END
+ValidatesPresenceOfTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ValidatesPresenceOfTest.php
+END
+ValidatesNumericalityOfTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/ValidatesNumericalityOfTest.php
+END
+PgsqlAdapterTest.php
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/source/dante/!svn/ver/1/application/libraries/php-activerecord/test/PgsqlAdapterTest.php
+END

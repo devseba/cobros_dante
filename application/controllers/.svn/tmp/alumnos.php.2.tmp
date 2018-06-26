@@ -1,0 +1,405 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Alumnos extends CI_Controller {
+
+	function __construct()
+	{
+		parent::__construct();
+		if(!$this->session->userdata('id')) redirect('auth/login');
+	}
+
+	public function index($offset = 0)
+	{
+		$this->load->library('pagination');
+		$config['base_url'] = site_url('alumnos/index');
+		$config['total_rows'] = Student::count();
+<<<<<<< .mine
+		$config['per_page'] = '20'; 
+		$config['num_links'] = '5'; 
+=======
+		$config['per_page'] = '10'; 
+		$config['num_links'] = '5'; 
+>>>>>>> .r58
+		$config['first_link'] = '&larr; primero';
+		$config['last_link'] = 'último &rarr;';
+		$this->pagination->initialize($config);
+		
+		$a = Student::find('all', array('order' => 'apellido ASC, nombre ASC','limit' => $config['per_page'], 'offset' => $offset));
+		
+<<<<<<< .mine
+		$this->table->set_heading('Apellido', 'Nombre','Fecha de nacimiento', 'Documento','Telefono','Celular','Acciones');
+=======
+		$this->table->set_heading('Apellido','Nombre', 'Fecha de nacimiento', 'Documento','Telefono','Celular','Acciones');
+>>>>>>> .r58
+		foreach($a as $al)
+		{
+			$this->table->add_row(
+				$al->apellido,
+				$al->nombre,
+				($al->fecha_nacimiento)?$al->fecha_nacimiento->format('d/m/Y'):'',
+				$al->tipo_documento.' '.$al->nro_documento,
+				$al->telefono,
+				$al->celular,
+				anchor('alumnos/ver/'.$al->id,img('static/img/icon/doc_lines.png'), 'class="tipwe" title="Ver detalles de alumno"').' '.
+				anchor('alumnos/editar/'.$al->id,img('static/img/icon/pencil.png'), 'class="tipwe" title="Editar alumno"').' '.
+				anchor('alumnos/eliminar/'.$al->id,img('static/img/icon/trash.png'), 'class="tipwe eliminar" title="Eliminar alumno"')
+			);
+		}
+		
+		$data['alumnos'] = $this->table->generate();
+		$data['pagination'] = $this->pagination->create_links();
+		
+		$data['niveles'] = Level::all();
+		$data['cursos'] = Course::find('all', array('select' => 'id,level_id,course,division_id'));
+		$data['divisiones'] = Course::all();
+		
+		$this->template->write_view('content', 'alumnos/index',$data);
+		$this->template->render();
+	}
+	
+	public function filter($offset = 0)
+	{
+		$string = '%'.$this->input->post('string').'%';
+		$nivel = $this->input->post('level_id');
+		$curso = $this->input->post('course_id');
+		$division = $this->input->post('division_id');
+		
+		/*$sql = "SELECT 
+					students.id,
+					students.nombre,
+					students.apellido,
+					students.fecha_nacimiento,
+					students.tipo_documento,
+					students.nro_documento,
+					students.telefono,
+					students.celular
+				FROM students";
+		
+		if($nivel > 0)
+		{
+			$sql .= " JOIN inscriptions ON students.id = inscriptions.student_id";
+			$sql .= " JOIN courses ON inscriptions.course_id = courses.id";
+			$sql .= " JOIN levels ON courses.level_id = levels.id";
+			$sql .= " JOIN divisions ON courses.division_id = divisions.id";
+			$sql .= " WHERE levels.id = ".$nivel;
+			$s = " AND ";
+			
+			if($curso > 0) $sql .= " AND courses.id = ".$curso;
+			if($division > 0) $sql .= " AND divisions.id = ".$division;
+		}
+		
+		if($string !== '%%')
+		{
+			if(!isset($s)) $s=' WHERE ';
+			$sql .= $s."(students.nombre LIKE ".$string;
+			$sql .= " OR students.apellido LIKE ".$string;
+			$sql .= " OR students.nro_documento LIKE ".$string;
+			$sql .= " OR students.telefono LIKE ".$string.")" ;
+		}*/
+		
+		$condiciones = '';
+		$valores = array();
+		$joins = '';
+		
+		if($string !== '%%'){
+			$condiciones .= " ((CONCAT(apellido, nombre) LIKE ? OR CONCAT(nombre, apellido) LIKE ? )";
+			$valores['apellido'] = $string;
+			$valores['nombre'] = $string;
+			$condiciones .= " OR nro_documento LIKE ? ";
+			$condiciones .= " OR telefono LIKE ? )";
+			$valores['documento'] = $string;
+			$valores['telefono'] = $string;
+			}
+		
+		if($nivel >0){
+			$joins = 'LEFT JOIN inscriptions ON students.id = inscriptions.student_id
+					  LEFT JOIN courses ON inscriptions.course_id = courses.id
+					  LEFT JOIN levels ON courses.level_id = levels.id
+					  LEFT JOIN divisions ON courses.division_id = divisions.id
+					  ';
+			if($condiciones != '')
+				$condiciones .= " AND ";
+			$condiciones .= " levels.id = ?";
+			$valores['nivel'] = $nivel;
+			
+			if($curso > 0){
+				$condiciones .= " AND courses.id = ?";
+				$valores['curso'] = $curso;
+			}
+			
+			if($division > 0){
+				$condiciones .= " AND divisions.id = ?";
+				$valores['division'] = $division;
+			}
+		}
+		
+		$conditions = array_merge(array($condiciones), $valores);
+		
+<<<<<<< .mine
+		//print_r($conditions);
+		
+		$config['base_url'] = site_url('alumnos/index');
+		$config['total_rows'] = Student::count(array('joins'=>$joins,'conditions' => $conditions));
+		$config['per_page'] = '20'; 
+		$config['num_links'] = '5'; 
+		$config['first_link'] = '&larr; primero';
+		$config['last_link'] = 'último &rarr;';
+		$this->load->library('pagination', $config);
+		
+		$a = Student::all(array('joins'=>$joins,'conditions' => $conditions, 'order' => 'apellido ASC, nombre ASC', 'limit' => $config['per_page'], 'offset' => $offset) );
+				
+		$this->table->set_heading('Apellido', 'Nombre','Fecha de nacimiento', 'Documento','Telefono','Celular','Acciones');
+=======
+		$this->table->set_heading('Apellido','Nombre', 'Fecha de nacimiento', 'Documento','Telefono','Celular','Acciones');
+	
+>>>>>>> .r58
+		foreach($a as $al)
+		{
+			$this->table->add_row(
+				$al->apellido,
+				$al->nombre,
+				$al->fecha_nacimiento->format('d/m/Y'),
+				$al->tipo_documento.' '.$al->nro_documento,
+				$al->telefono,
+				$al->celular,
+				anchor('alumnos/ver/'.$al->id,img('static/img/icon/doc_lines.png'), 'class="tipwe" title="Ver detalles de alumno"').' '.
+				anchor('alumnos/editar/'.$al->id,img('static/img/icon/pencil.png'), 'class="tipwe" title="Editar alumno"').' '.
+				anchor('alumnos/eliminar/'.$al->id,img('static/img/icon/trash.png'), 'class="tipwe eliminar" title="Eliminar alumno"')
+			);
+		}
+		echo $this->table->generate();
+		
+		echo '<div class="pagination">';
+		echo $this->pagination->create_links();
+		echo '</div>';
+	}
+	
+	function test()
+	{
+		print_r($_POST);
+	}
+	
+	public function ver($id = FALSE)
+	{
+		if($id)
+		{
+			$data['a'] = Student::find($id);
+			
+			$this->table->set_heading('# Deuda','Concepto', 'Vencimiento', 'Importe', 'Descuento','A pagar','Saldo','Pagado');
+			foreach($data['a']->debt as $d)
+			{
+				$pagado = 0;
+				$descuento = 0;
+				foreach($d->detail as $p) { 
+					if(!$p->payment->anulado)
+						$pagado += $p->importe; 
+						}
+				foreach($d->student->scolarship as $des) (($des->student_id == $d->student_id) AND ($des->amount_id == $d->amount_id)) ? $descuento = $des->porcien_descuento : '';
+
+				$pagar = ($d->amount->importe-($d->amount->importe*($descuento/100)));
+				$saldo = $pagar - $pagado;
+				if($saldo > 0) {
+					$this->table->add_row(
+						$d->id,
+						$d->amount->concept->concepto.' '.$d->amount->fecha->format('L/Y'),
+						$d->amount->fecha->format('d/m/Y'),
+						'$'.$d->amount->importe,
+						($descuento) ? $descuento.'%' : 'No',
+						'$'.$pagar,
+						'$'.$saldo,
+						form_input(array('name' => 'parcial['.$d->id.']', 'class' => 'small', 'max' => $saldo, 'min' => 1)).' '.form_checkbox(array('name' => 'suma', 'class' => 'check', 'value' => $saldo))
+					);
+				}
+			}
+			$data['deudas'] = $this->table->generate(); // TABLA DEUDAS
+			
+			$this->table->set_heading('# Pago','Concepto','Fecha de pago','Importe', 'Cobrador', 'Acciones');
+			foreach($data['a']->payment as $p)
+			{	
+				if(!$p->anulado){
+					foreach($p->detail as $d) {
+						$this->table->add_row(
+							$p->id,
+							$d->debt->amount->concept->concepto.' '.$d->debt->amount->concept->ciclo_lectivo,
+							$p->fecha->format('d/m/Y'),
+							'$'.$d->importe,
+							$p->user->apellido.', '.$p->user->nombre,
+							anchor('alumnos/recibos/',img('static/img/icon/print.png'), 'class="tipwe" title="Imprimir recibo"').' '.anchor('pagos/eliminar/'.$p->id,img('static/img/icon/trash.png'), 'class="tipwe eliminar" title="Anular pago"')
+						);
+					}
+				}
+			}
+			$data['pagos'] = $this->table->generate(); // TABLA PAGOS
+			
+			$this->table->set_heading('Nombre','Telefono', 'Celular', 'Acciones');
+			foreach($data['a']->family as $i)
+			{
+				$this->table->add_row(
+					$i->tutor->nombre .' '.$i->tutor->apellido,
+					$i->tutor->telefono_fijo,
+					$i->tutor->celular,
+					anchor('tutores/editar/',img('static/img/icon/pencil.png'), 'class="tipwe eliminar" title="Editar"')
+				);
+			}
+			$data['tutores'] = $this->table->generate(); // TABLA INSCRIPCIONES
+			
+			$this->table->set_heading('Curso','División', 'Nivel', 'Acciones');
+			foreach($data['a']->inscription as $i)
+			{
+				$this->table->add_row(
+					$i->course->course,
+					$i->course->division->division,
+					$i->course->level->nivel,
+					anchor('alumnos/recibos/',img('static/img/icon/trash.png'), 'class="tipwe eliminar" title="Anular inscripción"')
+				);
+			}
+			$data['inscripciones'] = $this->table->generate(); // TABLA INSCRIPCIONES
+			
+			$this->template->write_view('content', 'alumnos/ver',$data);
+			$this->template->render();
+		}
+		else
+		{
+			$this->session->set_flashdata('msg','<div class="notice">El alumno no existe.</div>');
+			redirect('alumnos');
+		}
+	}
+
+	public function agregar()
+	{				
+		$data = array();
+		if ( $_POST )
+		{
+			$this->load->helper('date');
+			$this->load->library('Utils');
+			$insert = $_POST;
+			$insert['fecha_nacimiento'] = $this->utils->fecha_formato('%Y-%m-%d', $insert['fecha_nacimiento']);
+			$insert['fecha_inscripcion'] = $this->utils->fecha_formato('%Y-%m-%d', $insert['fecha_inscripcion']);
+			$alumno = new Student( 
+				elements( array(
+					'city_id',
+					'nombre',
+					'apellido',
+					'fecha_nacimiento',
+					'sexo',
+					'tipo_documento',
+					'nro_documento',
+					'domicilio',
+					'tenencia',
+					'nacionalidad',
+					'grupo_sanguineo',
+					'telefono',
+					'celular',
+					'obs_medicas',
+					'observaciones',
+					'colegio_procedencia',
+					'fecha_inscripcion',
+				), $insert )
+			);
+			if( $alumno->is_valid( ) )
+			{
+				$alumno->save();
+				$this->session->set_flashdata( 'msg','<div class="success">El alumno se guardó correctamente.</div>' );
+				redirect('alumnos/index/');
+			}
+			else
+			{
+				$data['errors'] = $alumno->errors;
+			}
+		}
+		
+		$data['paises'] = Country::all();
+		$data['provincias'] = State::all();
+		$data['ciudades'] = City::all();
+		$data['titulo'] = "Agregar alumno";
+		$data['action'] = "alumnos/agregar";
+		
+		$this->template->write_view('content', 'alumnos/agregar',$data);
+		$this->template->render();
+	}
+	
+	public function editar( $id )
+	{	
+		if(!$id)
+		{
+			$this->session->set_flashdata( 'msg','<div class="notice">El alumno solicitado no existe.</div>' );
+			redirect('alumnos');
+		}
+		elseif ( $_POST )
+		{
+			$this->load->helper('date');
+			$this->load->library('Utils');
+			$insert = $_POST;
+			$insert['fecha_nacimiento'] = $this->utils->fecha_formato('%Y-%m-%d', $insert['fecha_nacimiento']);
+			$insert['fecha_inscripcion'] = $this->utils->fecha_formato('%Y-%m-%d', $insert['fecha_inscripcion']);
+			
+			$alumno = Student::find($id);
+			
+			$alumno->update_attributes(elements( array(
+					'city_id',
+					'nombre',
+					'apellido',
+					'fecha_nacimiento',
+					'sexo',
+					'tipo_documento',
+					'nro_documento',
+					'domicilio',
+					'tenencia',
+					'nacionalidad',
+					'grupo_sanguineo',
+					'telefono',
+					'celular',
+					'obs_medicas',
+					'observaciones',
+					'colegio_procedencia',
+					'fecha_inscripcion',
+				), $insert )
+			);
+			
+			if( $alumno->is_valid( ) )
+			{
+				if($alumno->save())
+				{
+					$this->session->set_flashdata( 'msg','<div class="success">El alumno se guardó correctamente.</div>' );
+					redirect('alumnos');
+				}
+				else
+				{
+					$this->session->set_flashdata( 'msg','<div class="error">Hubo un error al guardar los datos.</div>' );
+					redirect($this->agent->referrer());
+				}
+			}
+			else
+			{
+				$data['errors'] = $alumno->errors;
+			}
+		}
+		else $data['a'] = Student::find($id);
+		
+		$data['paises'] = Country::all();
+		$data['provincias'] = State::all();
+		$data['ciudades'] = City::all();
+		$data['titulo'] = "Editar alumno";
+		$data['action'] = "alumnos/editar/".$id;
+		
+		$this->template->write_view('content', 'alumnos/agregar',$data);
+		$this->template->render();
+	}
+	
+	function eliminar($id)
+	{
+		if ($this->session->userdata('grupo') == 'admin')
+		{
+			$a = Student::find($id);
+			$a->delete();
+			$this->session->set_flashdata('msg','<div class="success">El alumno fué eliminado correctamente.</div>');
+			redirect('alumnos');			
+		}
+		else
+		{		
+			$this->session->set_flashdata('msg','<div class="error">No tiene permisos para realizar esta acción.</div>');
+			redirect('alumnos');
+		}
+		
+	}
+}
