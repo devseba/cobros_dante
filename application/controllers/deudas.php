@@ -1448,10 +1448,11 @@ class Deudas extends CI_Controller {
 		//obtengo la raiz del proyecto para establecer la ruta de los archivos
         $raiz = $this->utils->getPathRootProject();
         $ruta_archivos = $raiz."files/link/";
+        $num_volumen = 9;
 		//Obtenemos el dia actual
 		$dia = date("d");
 		//Formamos el nombre del archivo
-		$archivo ='PDKT1'.strtoupper($mes_hex).$dia;
+		$archivo ='PDKT'.$num_volumen.strtoupper($mes_hex).$dia;
 		//creamos y abrimos el archivo
 		$txt= fopen($ruta_archivos.$archivo, 'w+') or die ('Problemas al crear el archivo');
 		//creamos el header para el archivo
@@ -1460,7 +1461,7 @@ class Deudas extends CI_Controller {
 		fwrite($txt, $header_file);	
 		//Archivo de control
 		//Formamos el nombre del archivo
-		$archivo2 ='CDKT1'.strtoupper($mes_hex).$dia;
+		$archivo2 ='CDKT'.$num_volumen.strtoupper($mes_hex).$dia;
 		//creamos y abrimos el archivo
 		$txt2= fopen($ruta_archivos.$archivo2, 'w+') or die ('Problemas al crear el archivo');
 		//creamos el header para el archivo
@@ -1859,5 +1860,45 @@ class Deudas extends CI_Controller {
 		/*$this->session->set_flashdata('next',base_url('deudas/refresh_master'));
 		$this->template->write_view('content', 'deudas/refresh_master',$data);
 		$this->template->render();*/
+	}
+
+	function getIdDeudaPagosLink(){
+		$d = Debt::all(array("conditions"=>array("pago_link",1)));
+		$IDDeudas = array();
+		foreach ($d as $key => $value) {
+			$IDDeuda = substr($value->registro_link, 0,5);
+			if(!in_array($IDDeuda, $IDDeudas)){
+				$IDDeudas[] = $IDDeuda;
+			}
+		}
+		//print_r($IDDeudas);
+		foreach ($IDDeudas as $key => $value) {
+			echo $value.",";
+		}
+	}
+
+
+	function verificar_archivos_refresh(){
+		$sql = "SELECT * FROM files WHERE medio = 2 AND name LIKE 'PDKT%'";
+		$f = $this->db->query($sql);
+		foreach ($f->result() as $key => $value) {
+			echo "File: ".$value->name."<br>";
+			$fp = fopen($value->path, 'r') or die ('Problemas al abrir el archivo');
+			$size  = filesize($value->path);
+			$cant_line = 131;
+			$count = $size / $cant_line;
+			$linea = fgets($fp);
+			for($i = 1; $i < ($count-1); $i++){
+				$reg = substr($linea, $i * $cant_line,$cant_line);
+				$sql2 = "SELECT * FROM debts WHERE registro_link LIKE '".$reg."'";
+				$d = $this->db->query($sql2);
+				if($d->num_rows() == 0){
+					print_r($d->row()->registro_link);
+					echo "<br>";
+				}
+			}
+			fclose($fp);
+			echo "*******************************************************************************************<br>";		
+		}
 	}
 }

@@ -172,6 +172,6 @@
 		}
 
 		function getPathRootProject(){
-			return $_SERVER['DOCUMENT_ROOT']."/cobros_prueba/";
+			return $_SERVER['DOCUMENT_ROOT']."/cobros/";
 		}
 	}

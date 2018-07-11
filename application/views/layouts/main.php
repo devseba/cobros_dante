@@ -129,45 +129,54 @@
 				<![endif]-->
 				 
 				</li>
-				<li><?=anchor('pagos', img('static/img/icon/chart_bar.png').' Importar')?>
-				 
-				<!--[if lte IE 6]>
-				<a href="<?=site_url('alumnos')?>"> Cobranzas
-				<table><tr><td>
-				<![endif]-->
-				 
+				<li><?=anchor('pagos', img('static/img/icon/chart_bar.png').' Archivos')?>
 					<ul>
-						<li><?=anchor('pagos/import_archivo_bsj', img('static/img/icon/list_num.png').' Archivo BSJ')?>							
-						</li>
-						<li><?=anchor('pagos/ver_archivos_bsj', img('static/img/icon/list_num.png').' Ver Archivos')?>						
-						</li>
-					</ul>					
-				 
-				<!--[if lte IE 6]>
-				</td></tr></table>
-				</a>
-				<![endif]-->
-				 
-				</li>
 
-				</li>
-				<li><?=anchor('pagos', img('static/img/icon/chart_bar.png').' Exportar')?>
-				 
-				<!--[if lte IE 6]>
-				<a href="<?=site_url('alumnos')?>"> Cobranzas
-				<table><tr><td>
-				<![endif]-->
-				 
-					<ul>
-						<li><?=anchor('deudas/refresh_master', img('static/img/icon/list_num.png').'REFRESH')?></li>
-					</ul>					
-				 
-				<!--[if lte IE 6]>
-				</td></tr></table>
-				</a>
-				<![endif]-->
-				 
-				</li>							
+						<li><?=anchor('pagos', img('static/img/icon/chart_bar.png').' Importar')?>
+						 
+							<!--[if lte IE 6]>
+							<a href="<?=site_url('alumnos')?>"> Cobranzas
+							<table><tr><td>
+							<![endif]-->
+						 
+							<ul>
+								<li><?=anchor('pagos/import_archivo_bsj', img('static/img/icon/list_num.png').' Archivo BSJ')?>							
+								</li>
+								<li><?=anchor('pagos/import_archivo_link', img('static/img/icon/list_num.png').' Archivo Extract (link)')?>							
+								</li>								
+							</ul>					
+						 
+							<!--[if lte IE 6]>
+							</td></tr></table>
+							</a>
+							<![endif]-->
+						 
+						</li>
+
+						</li>
+						<li><?=anchor('pagos', img('static/img/icon/chart_bar.png').' Exportar')?>
+						 
+							<!--[if lte IE 6]>
+							<a href="<?=site_url('alumnos')?>"> Cobranzas
+							<table><tr><td>
+							<![endif]-->
+						 
+							<ul>
+								<li><?=anchor('deudas/refresh_master', img('static/img/icon/list_num.png').'REFRESH')?></li>
+							</ul>					
+						 
+							<!--[if lte IE 6]>
+							</td></tr></table>
+							</a>
+							<![endif]-->
+						 
+						</li>						
+
+						<li>
+							<?=anchor('pagos/ver_archivos_bsj', img('static/img/icon/list_num.png').' Ver Archivos BSJ')?>
+						</li>
+					</ul>
+				</li>						
 				
 				<?php if($this->session->userdata('grupo') == 'admin'):?>
 				<li><?=anchor('paises/agregar', img('static/img/icon/wrench_plus.png').' Configuración')?>

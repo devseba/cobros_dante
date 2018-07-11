@@ -49,7 +49,7 @@
 			        	<td><?=$row["id_concepto"]?></td>
 			        	<td><?=$row["id_usuario"]?></td>
 			        	<?$importe = $row["importe_pagado"];?>
-			        	<?$importe = substr($importe, 0, 10).".".substr($importe, 9, 2);?>
+			        	<?$importe = substr($importe, 0, 10).".".substr($importe, 10, 2);?>
 			        	<td><?="$ ".number_format(floatval($importe),2,",",".")?></td>			        	
 			        	<td><?=substr($row["fecha_pago"], 6,2)."/".
 			        			substr($row["fecha_pago"], 4,2)."/".
