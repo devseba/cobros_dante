@@ -1440,25 +1440,69 @@ class Pagos extends CI_Controller {
 		$i = 0;
 		foreach ($lineas as $linea_num => $linea){
 			if($linea_num == 0){//HEADER
-				$datos["header"]["tipo_registro"] = substr($linea, 0, 1);
-				$datos["header"]["codigo_ente"] = substr($linea, 1,3);
-				$datos["header"]["fecha_proceso"] = substr($linea, 4,8);
-				$datos["header"]["filer"] = substr($linea, 12,86);
+				$datos["header"]["tipo_registro"] = substr($linea, 0, 6);
+				$datos["header"]["codigo_bcra"] = substr($linea, 6,3);
+				$datos["header"]["fecha_negocios"] = substr($linea, 9,8);
+				$datos["header"]["fecha_aplanado"] = substr($linea, 17,8);
+				$datos["header"]["nro_lote"] = substr($linea, 25,5);
 			}
 			elseif($linea_num == ($cant - 1)){
-				$datos["footer"]["tipo_registro"] = substr($linea, 0, 1);
-				$datos["footer"]["cantidad_registro"] = substr($linea, 1,6);
-				$datos["footer"]["sumatoria"] = substr($linea, 7,16);
-				$datos["footer"]["cantidad_trx"] = substr($linea, 23,75);
+				$datos["footer"]["tipo_archivo"] = substr($linea, 0, 7);
+				$datos["footer"]["cantidad_registro"] = substr($linea, 7,8);
+				$datos["footer"]["importe"] = substr($linea, 15,13);
+				$datos["footer"]["cantidad_trx"] = substr($linea, 28,8);
 			}
 			else{
-				$datos["datos"][$i]["tipo_registro"] = substr($linea, 0, 1);
-				$datos["datos"][$i]["id_deuda"] = substr($linea, 1, 5);
-				$datos["datos"][$i]["id_concepto"] = substr($linea, 6, 3);
-				$datos["datos"][$i]["id_usuario"] = substr($linea, 9, 15);
-				$datos["datos"][$i]["importe"] = substr($linea, 28, 12);
-				$datos["datos"][$i]["fecha_pago"] = substr($linea, 40, 8);
-				$datos["datos"][$i]["discrecional"] = substr($linea, 48, 50);
+				$datos["datos"][$i]["datos_mas_relleno"] = substr($linea, 0, 8);// 0 -> Datos+Relleno(3)
+				$datos["datos"][$i]["codigo_bcra"] = substr($linea, 8,4);// 1 -> Código Banco SAM
+				$datos["datos"][$i]["r"] = substr($linea, 12,1);// 2 -> R
+				$datos["datos"][$i]["codigo_terminal_sam"] = substr($linea, 13,5);// 3 -> Código de Terminal SAM
+				$datos["datos"][$i]["relleno1"] = substr($linea, 18,10);// 4 -> Relleno
+				$datos["datos"][$i]["codigo_sucursal_sam"] = substr($linea, 28,4);// 5 -> Código de Sucursal SAM
+				$datos["datos"][$i]["n_secuencia_on"] = substr($linea, 32,8);// 6 -> Sin Uso actualmente
+				$datos["datos"][$i]["transaccion"] = substr($linea, 40,8);// 7 -> Nro. de Transacción SAM
+				$datos["datos"][$i]["codigo_operacion"] = substr($linea, 48,2);// 8 -> A3 efectivo
+															 //      A2 cheque v.impuestos
+															 //		 A5 cheque común
+
+				$datos["datos"][$i]["relleno2"] = substr($linea, 50,2);// 9 -> Relleno
+				$datos["datos"][$i]["relleno3"] = substr($linea, 52,2);// 10 -> Relleno
+				$datos["datos"][$i]["codigo_ente"] = substr($linea, 54,4);// 11 -> Código de Ente
+				$datos["datos"][$i]["codigo_servicio_ident"] = substr($linea, 58,19);// 12 -> Identificación de Ticket
+				$datos["datos"][$i]["importe"] = substr($linea, 77,11);// 13 -> Importe de Transacción
+				$datos["datos"][$i]["relleno4"] = substr($linea, 88,11);// 14 -> Relleno
+				$datos["datos"][$i]["relleno5"] = substr($linea, 99,11);// 15 -> Relleno
+				$datos["datos"][$i]["moneda"] = substr($linea, 110,1);// 16 -> Moneda 0 = Pesos, 1 = Doláres
+				$datos["datos"][$i]["codigo_cajero"] = substr($linea, 111,4);// 17 -> Código de Cajero 
+				$datos["datos"][$i]["relleno6"] = substr($linea, 115,3);// 18 -> Relleno
+				$datos["datos"][$i]["relleno7"] = substr($linea, 118,1);// 19 -> Relleno
+				$datos["datos"][$i]["codigo_seguridad"] = substr($linea, 120,3);// 20 -> Código de Seguridad SAM
+				$datos["datos"][$i]["relleno_primer_venc"] = substr($linea, 123,6);// 21 -> Relleno o fecha de 1er.vto
+				$datos["datos"][$i]["relleno8"] = substr($linea, 129,6);// 22 -> Relleno
+				$datos["datos"][$i]["banco_cheque"] = substr($linea, 135,3);// 23 -> Bco. del Cheque
+				$datos["datos"][$i]["sucursal"] = substr($linea, 138,3);// 24 -> Suc. del Cheque
+				$datos["datos"][$i]["cod_postal"] = substr($linea, 141,4);// 25 -> CodPostal 0000
+				$datos["datos"][$i]["nro_cheque"] = substr($linea, 145,8);// 26 -> Nro. de Cheque
+				$datos["datos"][$i]["nro_cuenta"] = substr($linea, 153,8);// 27 -> Nro Cuenta
+				$datos["datos"][$i]["plazo"] = substr($linea, 161,3);// 28 -> Plazo Clearing del cheque
+				$datos["datos"][$i]["codigo_barra"] = substr($linea, 164,60);// 29 -> Código de Barra
+				$datos["datos"][$i]["fecha_pago"] = substr($linea, 224,6);// 30 -> Fecha de Pago de la Transacción
+				$datos["datos"][$i]["modo_pago"] = substr($linea, 230,1);// 31 -> Modo de Pago 
+				$datos["datos"][$i]["relleno9"] = substr($linea, 231,7);// 32 -> Relleno 
+				$datos["datos"][$i]["relleno10"] = substr($linea, 238,9);// 33 -> Relleno 
+				$datos["datos"][$i]["forma_pago"] = substr($linea, 247,2);// 34 -> Forma Pago
+				$datos["datos"][$i]["relleno11"] = substr($linea, 249,4);// 35 -> Relleno 0000
+				$datos["datos"][$i]["relleno12"] = substr($linea, 253,3);// 36 -> Relleno 
+				$datos["datos"][$i]["autorizacion_relleno"] = substr($linea, 256,15);// 37 -> Autorización (*) o Relleno
+				$datos["datos"][$i]["relleno13"] = substr($linea, 271,8);// 38 -> Relleno
+
+				$nro_comprobante = substr($datos["datos"][$i]["codigo_barra"],4,8);
+				$payment = Payment::find(array('order'=>'id ASC',
+										'conditions'=>array('nro_comprobante LIKE ?','0002-'.$nro_comprobante)));
+				$datos["datos"][$i]["payment"] = $payment;
+				foreach ($payment->detail as $key => $value) {
+					$datos["datos"][$i]["detail"][$value->payment_id] = $value;
+				}
 				$i++;
 			}
 			/*$clave = trim($datos[0]);
@@ -1805,15 +1849,14 @@ class Pagos extends CI_Controller {
 			foreach ($datos as $key => $value) {
 				$importe = $value["importe_pagado"];
 				$importe = substr($importe, 0, 10).".".substr($importe, 10, 2);
-				$nro = Payment::last(array('order'=>'nro_recibo ASC',
+				$nro = Payment::last(array('order'=>'id ASC',
 													'conditions'=>array('nro_comprobante LIKE ? AND YEAR(fecha) > ?','0003-%','2017')));
 				$insert['nro_comprobante'] = '0003-00000001';
 				$nuevo = explode('-',$insert['nro_comprobante']);
 				if($nro){
-					$insert['nro_comprobante'] = $nuevo[0].'-'.str_pad(($nuevo[1] + 1), 8, '0', STR_PAD_LEFT);
+					$insert['nro_comprobante'] = $nro->pto_venta.'-'.str_pad(($nro->nro_recibo + 1), 8, '0', STR_PAD_LEFT);
 					$nuevo = explode('-',$insert['nro_comprobante']);
 				}
-
 				$insert['moneda']=isset($insert['moneda'])?$insert['moneda']:1; //Pesos
 				$insert['ptype_id'] = isset($insert['ptype'])?$insert['ptype']:array(18); //Pesos
 				$insert['user_id'] = $user->id;
