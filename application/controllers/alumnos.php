@@ -382,8 +382,13 @@ class Alumnos extends CI_Controller {
 			$deudas = $data['a']->debt;
 			$pagos = $data['a']->payment;
 			$becas = Scolarship::all(array('conditions' => array('student_id = ?',$id)));
-			
+			$codigo_link = str_pad($id, 15, '0', STR_PAD_LEFT);
+			/*Reviso si esta el codigo link generado y aceptado por pagos link*/
+
+			/**/
 			$this->table->set_heading('# Deuda','Concepto', 'Vencimiento', 'Importe', 'Desc.','A pagar','Pagado','Pendiente','Saldo','Link','');
+			
+			$ban_link = false;
 			
 			foreach($deudas as $d){
 				$descuento = 0;
@@ -424,7 +429,17 @@ class Alumnos extends CI_Controller {
 							'$'.$saldo,
 							form_hidden('saldo['.$d->id.']', $saldo).' '.form_input(array('name' => 'parcial['.$d->id.']', 'class' => 'small', 'max' => $saldo, 'min' => 1,'readonly'=>'true')).' '.form_checkbox(array('name' => 'suma', 'class' => 'check', 'value' => $saldo))
 						);
-					}				
+					}
+
+					if(!$ban_link){
+						$mystring = $d->registro_link;
+						$findme   = $codigo_link;
+						$pos = strpos($mystring, $findme);
+						//2 significa que el codigo link esta aceptado por pagos link
+						if ($pos != 0 && $d->estado_pago_link == 2) {
+							$ban_link = true;
+						}
+					}
 				}
 				else{
 					if($saldo > 0 || $ban == 1){
@@ -683,6 +698,10 @@ class Alumnos extends CI_Controller {
 			else $data['eventual'] = FALSE;
 			//Agregado por seba
 			if($this->session->userdata('grupo') == 'alumno'){//esto es para el tutor
+				if($ban_link === false){
+					$codigo_link = "No generado, comuniquese con el colegio";
+				}
+				$data["codigo_link"] = $codigo_link;
 				$this->template->write_view('content', 'alumnos/tutor/ver',$data);
 			}
 			else{

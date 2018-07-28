@@ -1,3 +1,13 @@
+<style>
+	.borde-codigo-link{
+		border-style: solid;
+		padding: 20px 0px 20px 20px;
+		margin-left: 10px;
+		color: red;
+		font-weight: bold;
+		border-color: red;
+	}
+</style>
 <div class="yui-gd">
 	<div class="yui-u first">
 		<div class="pad">
@@ -30,6 +40,10 @@
 				<dt>Nacionalidad</dt>
 				<dd><?=$a->nacionalidad?></dd>
 			</dl>
+		</div>
+		<br><br>
+		<div class="borde-codigo-link"><!-- codigo link -->
+			<h1><b>CODIGO DE LINK PAGOS:</b><?=$codigo_link?></h1>
 		</div>
 	</div>
 	<div class="yui-u">

@@ -1270,9 +1270,9 @@ class Pagos extends CI_Controller {
 				//$campo[] = date("2106y",strtotime($d->debt->amount->fecha));;//campo 11 Fecha 3er vto
 				//exit();			
 				$codigo_link = "";
-				/*if($d->debt->registro_link != ""){
+				if($d->debt->registro_link != ""){
 					$codigo_link = substr($d->debt->registro_link, 8, 15);
-				}*/
+				}
 				$data['codigo_link'] = $codigo_link;
 				$data['barcode'][] = $this->generar_barcode($campo);
 				$concepto = $d->debt->amount->concept->concepto.' '.$d->debt->amount->ciclo_lectivo;
@@ -1347,7 +1347,7 @@ class Pagos extends CI_Controller {
 				$file = $this->upload_file($path);
 				//Verifico si ha habido error en la subida del archivo
 				if(!$file["error"] == 0){
-					$this->session->set_flashdata('msg','<div class="errors">Error al subir archivo.</div>');
+					$this->session->set_flashdata('msg','<div class="error">Error al subir archivo.</div>');
 				}
 				else{
 					//Guardo en la bd un registro del archivo subido
@@ -1358,7 +1358,7 @@ class Pagos extends CI_Controller {
 									"medio" => 1);
 					$f = new File($file_db);
 					if(!$f->save()){
-						$this->session->set_flashdata('msg','<div class="errors">Error al guardar datos del archivo.</div>');
+						$this->session->set_flashdata('msg','<div class="error">Error al guardar datos del archivo.</div>');
 					}
 				}
 			}
@@ -1382,14 +1382,14 @@ class Pagos extends CI_Controller {
 					$result = $this->actualizar_cuenta_corriente($data["datos"]);
 					
 					if($result["estado"] === FALSE){
-						$this->session->set_flashdata('msg','<div class="errors">Error al guardar datos</div>');
+						$this->session->set_flashdata('msg','<div class="error">Error al guardar datos</div>');
 					}
 					else{
 						$this->session->set_flashdata('msg','<div class="success">Importacion realizada satisfactoriamente</div>');
 					}
 				}
 				else{
-					$this->session->set_flashdata('msg','<div class="errors">Error al leer archivo.</div>');
+					$this->session->set_flashdata('msg','<div class="error">Error al leer archivo.</div>');
 				}
 			}		
 		}
@@ -1709,7 +1709,8 @@ class Pagos extends CI_Controller {
 			$nombre_fichero = "files/link/" . basename($_FILES["file"]["name"]);
 			//Si existe el archivo no hace falta subirlo solo lo voy a leer
 			if (file_exists($nombre_fichero)) {
-				$file["error"] = 0;
+				$file["error"] = 1;
+				$file["msg"] = "Archivo duplicado. No se puede subir un archivo existente.";
 				$file["file"] = $nombre_fichero;
 				$update_file = 1;
 			}
@@ -1718,7 +1719,7 @@ class Pagos extends CI_Controller {
 				$file = $this->upload_file($path);
 				//Verifico si ha habido error en la subida del archivo
 				if(!$file["error"] == 0){
-					$this->session->set_flashdata('msg','<div class="errors">Error al subir archivo.</div>');
+					$this->session->set_flashdata('msg','<div class="error">Error al subir archivo.</div>');
 				}
 				else{
 					//Guardo en la bd un registro del archivo subido
@@ -1729,9 +1730,9 @@ class Pagos extends CI_Controller {
 									"medio" => 2);
 					$f = new File($file_db);
 					if(!$f->save()){
-						$this->session->set_flashdata('msg','<div class="errors">Error al guardar datos del archivo.</div>');
+						$this->session->set_flashdata('msg','<div class="error">Error al guardar datos del archivo.</div>');
 					}
-					else{						
+					else{
 						$file_id = $f->id;
 					}
 				}
@@ -1756,17 +1757,21 @@ class Pagos extends CI_Controller {
 					$result = $this->actualizar_cuenta_corriente_link($data["datos"],$file_id);
 					
 					if($result["estado"] === FALSE){
-						$this->session->set_flashdata('msg','<div class="errors">'.$result['msg'].'</div>');
+						$this->session->set_flashdata('msg','<div class="error">'.$result['msg'].'</div>');
 					}
 					else{
 						$this->session->set_flashdata('msg','<div class="success">Importacion realizada satisfactoriamente</div>');
 					}
 				}
 				else{
-					$this->session->set_flashdata('msg','<div class="errors">Error al leer archivo.</div>');
+					$this->session->set_flashdata('msg','<div class="error">No hay pagos en el archivo para guardar.</div>');
+					redirect('pagos/import_archivo_link');
 				}
 			}
-			//redirect('pagos/import_archivo_link');
+			else{
+				$this->session->set_flashdata('msg','<div class="error">'.$file['msg'].'</div>');
+				redirect('pagos/import_archivo_link');				
+			}
 			$data['titulo'] = "Importar archivo de Pago Link";
 			//$this->template->set_template('reporte');
 			$this->template->write_view('content', 'pagos/tutor/import_archivo_link',$data);
@@ -1797,7 +1802,7 @@ class Pagos extends CI_Controller {
 				$datos["header"]["fecha_proceso"] = substr($linea, 4,8);
 				$datos["header"]["filer"] = substr($linea, 12,86);
 			}
-			elseif($linea_num == ($cant - 1)){
+			elseif($linea_num == ($cant - 1)){//FOOTER
 				$datos["footer"]["tipo_registro"] = substr($linea, 0, 1);
 				$datos["footer"]["cantidad_registro"] = substr($linea, 1,6);
 				$datos["footer"]["importe"] = substr($linea, 7,16);
