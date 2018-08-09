@@ -1246,7 +1246,6 @@ class Deudas extends CI_Controller {
 		$this->session->set_flashdata('next',base_url('deudas/refresh_master'));
 		$this->template->write_view('content', 'deudas/refresh_master',$data);
 		$this->template->render();
-
 	}	
 
 	public function filters_refresh($offset = 0){
@@ -1407,7 +1406,8 @@ class Deudas extends CI_Controller {
 			$total_deuda = 0;
 			$this->table->set_heading('Fecha', 'Estudiante', 'Concepto','Curso','Importe');
 			foreach($deudas as $deuda){
-				$pagado = Detail::all(array('conditions'=>array('debt_id = ?',$deuda->id)));
+				$joins = 'JOIN payments ON payments.id = details.payment_id';
+				$pagado = Detail::all(array('joins' => $joins, 'conditions'=>array('debt_id = ? AND payments.anulado <> ?',$deuda->id,1)));
 				$pago =0;
 				foreach($pagado as $p){
 					$pago += $p->importe;
@@ -1423,7 +1423,7 @@ class Deudas extends CI_Controller {
 					$deuda->student->apellido.' '.$deuda->student->nombre,
 					$deuda->amount->concept->concepto.' '.$deuda->amount->ciclo_lectivo,
 					$deuda->amount->course->course,
-					'$'.($imp_deuda-$pago)
+					'$'.($imp_deuda - $pago)
 				);
 				$total_deuda += ($imp_deuda-$pago);
 			}
@@ -1636,7 +1636,8 @@ class Deudas extends CI_Controller {
 			$array_id_deudas = array();
 			$registros = "";
 			foreach($deudas as $deuda){
-				$pagado = Detail::all(array('conditions'=>array('debt_id = ?',$deuda->id)));
+				$joins = 'JOIN payments ON payments.id = details.payment_id';
+				$pagado = Detail::all(array('joins' => $joins, 'conditions'=>array('debt_id = ? AND payments.anulado <> ?',$deuda->id,1)));
 				$pago =0;
 				foreach($pagado as $p){
 					$pago += $p->importe;
@@ -1844,6 +1845,9 @@ class Deudas extends CI_Controller {
 		        $this->db->where("id", $value);
 		        $this->db->set(array("registro_link"=>$array_registros[$value]));
 		        $this->db->update("debts");
+
+		        $datos = array("debt_id" => $value, "file_id"=>$file_id);
+		        $this->db->insert("dfiles",$datos);
 	        }
         	print_r(implode(",", $array_id_deudas));
         }

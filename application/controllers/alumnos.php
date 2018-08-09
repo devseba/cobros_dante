@@ -99,13 +99,15 @@ class Alumnos extends CI_Controller {
 			$orden = $offset+1;
 			foreach($a as $al){	
 				$pant='';
+				//busco si tiene usuario
+				$user = User::find(array("conditions"=>array('nro_documento LIKE ?',$al->nro_documento)));
 				if($al->egresado==1){
 					$pant = 'EGRESADO';
 				}
 				else{
 					$insc = Inscription::last(array('conditions' => array('student_id = ?',$al->id)));
 					$pant = ($insc)?$insc->course->course .' '.$insc->division->division:''; 
-					}
+				}
 				$this->table->add_row(
 					$orden++,
 					$al->apellido,
@@ -115,7 +117,8 @@ class Alumnos extends CI_Controller {
 					$pant,
 					anchor('alumnos/ver/'.$al->id,img('static/img/icon/doc_lines.png'), 'class="tipwe" title="Ver detalles de alumno"').' '.
 					anchor('alumnos/editar/'.$al->id,img('static/img/icon/pencil.png'), 'class="tipwe" title="Editar alumno"').' '.
-					anchor('alumnos/eliminar/'.$al->id,img('static/img/icon/trash.png'), 'class="tipwe eliminar" title="Eliminar alumno"'),
+					anchor('alumnos/eliminar/'.$al->id,img('static/img/icon/trash.png'), 'class="tipwe eliminar" title="Eliminar alumno"').' '.
+					((count($user) == 0)?anchor('usuarios/agregar_alumno/'.$al->id, img('static/img/icon/user.png')):""),
 					($insc)?form_checkbox(array('name' => 'inscriptions[]', 'class' => 'check', 'value' => $insc->id)):''
 				);
 			}
@@ -215,6 +218,7 @@ class Alumnos extends CI_Controller {
 			$orden = $offset+1;
 			foreach($a as $al){	
 				$pant='';
+				$user = User::find(array("conditions"=>array('nro_documento LIKE ?',$al->nro_documento)));	
 				if($al->egresado==1){
 					$pant = 'EGRESADO';
 					$insc = NULL;
@@ -233,7 +237,8 @@ class Alumnos extends CI_Controller {
 					$pant,
 					anchor('alumnos/ver/'.$al->id,img('static/img/icon/doc_lines.png'), 'class="tipwe" title="Ver detalles de alumno"').' '.
 					anchor('alumnos/editar/'.$al->id,img('static/img/icon/pencil.png'), 'class="tipwe" title="Editar alumno"').' '.
-					anchor('alumnos/eliminar/'.$al->id,img('static/img/icon/trash.png'), 'class="tipwe eliminar" title="Eliminar alumno"'),
+					anchor('alumnos/eliminar/'.$al->id,img('static/img/icon/trash.png'), 'class="tipwe eliminar" title="Eliminar alumno"').' '.
+					((count($user) == 0)?anchor('usuarios/agregar_alumno/'.$al->id, img('static/img/icon/user.png')):""),
 					($insc)?form_checkbox(array('name' => 'inscriptions[]', 'class' => 'check', 'value' => $insc->id)):''
 				);
 			}

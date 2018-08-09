@@ -12,6 +12,11 @@
 			<?=form_input('importe', isset($a->importe) ? $a->importe : set_value('importe'),'id="importe"')?>
 			<?=form_label('Número de comprobante','nro_comprobante')?>
 			<?=form_input('nro_comprobante', isset($nro_comprobante) ? $nro_comprobante : set_value('nro_comprobante'),'id="nro_comprobante"')?>
+			<?=form_label('Cuotas','cuotas')?>
+			<?
+				$ps = array("1","2","3","4");
+			?>
+			<?=form_dropdown('cuotas_num',$ps,isset($filtros['usuario']) ? $filtros['usuario'] : set_value('user_id'),'id="cuotas_num" class="tipns" title=""')?>
 			<?=form_label('Pagado?','pagado')?>
 			<?=form_checkbox('pagado',1)?>
 		</div>

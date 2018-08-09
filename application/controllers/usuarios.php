@@ -128,6 +128,49 @@ class Usuarios extends CI_Controller {
 			redirect('usuarios/index/');
 		}
 	}
+
+	public function agregar_alumno($id)
+	{
+		$this->load->helper('date');
+		$this->load->library('Utils');
+		$st = Student::find($id);
+		$insert = array(
+			'nombre'        => $st->nombre,
+			'apellido'      => $st->apellido,
+			'direccion'     => $st->domicilio,
+			'telefono'      => $st->telefono,
+			'email'         => "NO_".$st->nro_documento,
+			'celular'       => $st->celular,
+			'usuario'       => $st->nro_documento,
+			'grupo'         => "alumno",
+			'password'      => $st->nro_documento,
+			'nro_documento' => $st->nro_documento
+		);
+		$usuario = new User( 
+			elements( array(
+				'nombre',
+				'apellido',
+				'direccion',
+				'telefono',
+				'email',
+				'celular',
+				'usuario',
+				'grupo',
+				'password',
+				'nro_documento'
+			), $insert )
+		);
+		if( $usuario->is_valid() )
+		{
+			$usuario->save();
+			$this->session->set_flashdata( 'msg','<div class="success">El usuario se guardó correctamente.</div>' );
+			redirect('alumnos');
+		}
+		else
+		{
+			$data['errors'] = $usuario->errors;
+		}
+	}
 	
 	public function editar( $id )
 	{	

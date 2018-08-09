@@ -576,6 +576,8 @@ class Pagos extends CI_Controller {
 	
 	function pago_eventual($student,$course,$inscription){
 		if($_POST){
+			print_r($_POST);
+			exit();
 			$i = Payment::connection();
 			try{
 				$i->transaction();
@@ -587,6 +589,8 @@ class Pagos extends CI_Controller {
 					$c = Concept::find_by_concepto($this->input->post('concepto'));
 				}
 				$c = $c->id;
+
+
 				
 				$a = Amount::create(array(
 					'concept_id' => $c,
@@ -654,8 +658,7 @@ class Pagos extends CI_Controller {
 		$this->template->render();
 	}
 	
-	function recibo($pagoid){
-		
+	function recibo($pagoid){		
 		$data['pago'] = Payment::find($pagoid);
 		$cd = array('conditions' => array('payment_id = ?', $pagoid));
 		$data['detalles'] = Detail::all($cd);
@@ -1206,7 +1209,7 @@ class Pagos extends CI_Controller {
 				//arreglos para el recibo
 				$array_fechas = array();
 				$array_importes = array();
-				if($hoy <= $ultima_fecha_mes){
+				/*if($hoy <= $ultima_fecha_mes){*/
 					$campo[] = $this->utils->importe_barcode($importe,5,2);//campo 6 importe 1er vto 7 dig					
 					$campo[] = date("15my",strtotime($d->debt->amount->fecha));//campo 7 Fecha 1er vto 6 dig
 					$array_importes['importe1'] = number_format($importe,"2",",",".");
@@ -1221,8 +1224,9 @@ class Pagos extends CI_Controller {
 					$campo[] = $this->utils->importe_barcode($importe * 1.15,5,2);//campo 10 Importe 3er vto					
 					$campo[] = date($ultimo_dia."my",strtotime($d->debt->amount->fecha));//campo 11 Fecha 3er vto
 					$array_importes['importe3'] = number_format(($importe * 1.15),"2",",",".");
-					$array_fechas['fecha3'] = date($ultimo_dia."/m/Y",strtotime($d->debt->amount->fecha));
-				}
+					//$array_fechas['fecha3'] = date($ultimo_dia."/m/Y",strtotime($d->debt->amount->fecha));
+					$array_fechas['fecha3'] = date("30/12/2018",strtotime($d->debt->amount->fecha));
+				/*}
 				else{
 					if($d->payment->fecha_reimpresion == ''){
 						//insertar fecha de reimpresion
@@ -1265,7 +1269,7 @@ class Pagos extends CI_Controller {
 
 					$array_importes['importe3'] = number_format($importe,"2",",",".");
 					$array_fechas['fecha3'] = date("d/m/y",strtotime($nuevo_venc3));
-				}
+				}*/
 
 				//$campo[] = date("2106y",strtotime($d->debt->amount->fecha));;//campo 11 Fecha 3er vto
 				//exit();			

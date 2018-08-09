@@ -149,10 +149,7 @@
 							<!--[if lte IE 6]>
 							</td></tr></table>
 							</a>
-							<![endif]-->
-						 
-						</li>
-
+							<![endif]-->					 
 						</li>
 						<li><?=anchor('pagos', img('static/img/icon/chart_bar.png').' Exportar')?>
 						 
@@ -168,13 +165,14 @@
 							<!--[if lte IE 6]>
 							</td></tr></table>
 							</a>
-							<![endif]-->
-						 
-						</li>						
-
+							<![endif]-->					 
+						</li>
 						<li>
 							<?=anchor('pagos/ver_archivos_bsj', img('static/img/icon/list_num.png').' Ver Archivos BSJ')?>
 						</li>
+						<li>
+							<?=anchor('files/listar_archivos_link', img('static/img/icon/list_num.png').' Ver Archivos Link')?>
+						</li>						
 					</ul>
 				</li>						
 				
