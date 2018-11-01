@@ -7,7 +7,7 @@ class Pagos extends CI_Controller {
 		//$this->output->enable_profiler(TRUE);
 		if(!$this->session->userdata('id')) redirect('auth/login');
 
-		$this->load->library('webservice/ws_afip');
+		//$this->load->library('webservice/ws_afip');
 	}
 
 	public function index($offset = 0){
@@ -575,7 +575,7 @@ class Pagos extends CI_Controller {
 				'fecha' => date('Y-m-d'),
 				'pagoId' => $pagoid,
 			);
-			$this->ws_afip->prepare_request($data);
+			//$this->ws_afip->prepare_request($data);
 			
 			
 			$this->session->unset_userdata('pago');
@@ -783,9 +783,9 @@ class Pagos extends CI_Controller {
 				'dnitutor' => $a->student->nro_documento,
 			);
 
-			$ws_result = $this->ws_afip->prepare_request_nc($data);
+			//$ws_result = $this->ws_afip->prepare_request_nc($data);
 
-			if($ws_result){
+			//if($ws_result){
 				$a->user_id = $this->session->userdata('id');
 				$a->anulado = 1;
 				$a->fecha_anulado = date('Y-m-d');
@@ -796,8 +796,8 @@ class Pagos extends CI_Controller {
 				$a->save();
 
 				$this->session->set_flashdata('msg','<div class="success">El pago fué anulado.</div>');
-			}
-			else $this->session->set_flashdata('msg','<div class="error">El pago no fué anulado (comprobante NO autorizado por AFIP).</div>');
+			//}
+			//else $this->session->set_flashdata('msg','<div class="error">El pago no fué anulado (comprobante NO autorizado por AFIP).</div>');
 		}
 		catch( \Exception $e){
 			$this->session->set_flashdata('msg','<div class="error">El pago no fué anulado.</div>');
@@ -1246,22 +1246,47 @@ class Pagos extends CI_Controller {
 				$array_fechas = array();
 				$array_importes = array();
 				/*if($hoy <= $ultima_fecha_mes){*/
-					$campo[] = $this->utils->importe_barcode($importe,5,2);//campo 6 importe 1er vto 7 dig					
-					$campo[] = date("15my",strtotime($d->debt->amount->fecha));//campo 7 Fecha 1er vto 6 dig
-					$array_importes['importe1'] = number_format($importe,"2",",",".");
-					$array_fechas['fecha1'] = date("15/m/Y",strtotime($d->debt->amount->fecha));
-					//$campo[] = date("1506y",strtotime($d->debt->amount->fecha));//campo 7 Fecha 1er vto 6 dig					
-					$campo[] = $this->utils->importe_barcode($importe * 1.10,5,2);//campo 8 Importe 2do vto
-					$campo[] = date("25my",strtotime($d->debt->amount->fecha));;//campo 9 Fecha 2do vto
-					//$campo[] = date("2006y",strtotime($d->debt->amount->fecha));;//campo 9 Fecha 2do vto
-					$array_importes['importe2'] = number_format(($importe * 1.10),"2",",",".");
-					$array_fechas['fecha2'] = date("25/m/Y",strtotime($d->debt->amount->fecha));
+					$fecha1_larga = date("15/m/Y",strtotime($d->debt->amount->fecha));
+					$fecha1_corta = date("15my",strtotime($d->debt->amount->fecha));
+					$fecha2_larga = date("25/m/Y",strtotime($d->debt->amount->fecha));
+					$fecha2_corta = date("25my",strtotime($d->debt->amount->fecha));
+					$fecha3_larga = date("30/12/Y",strtotime($d->debt->amount->fecha));
+					$fecha3_corta = date("3012y",strtotime($d->debt->amount->fecha));
 
-					$campo[] = $this->utils->importe_barcode($importe * 1.15,5,2);//campo 10 Importe 3er vto					
-					$campo[] = date("3012y",strtotime($d->debt->amount->fecha));//campo 11 Fecha 3er vto
-					$array_importes['importe3'] = number_format(($importe * 1.15),"2",",",".");
+					$importe1_barcode = $this->utils->importe_barcode($importe,5,2);
+					$importe1 = number_format($importe,"2",",",".");
+
+					$importe2_barcode = $this->utils->importe_barcode($importe * 1.10,5,2);
+					$importe2 = number_format(($importe * 1.10),"2",",",".");
+
+					$importe3_barcode = $this->utils->importe_barcode($importe * 1.15,5,2);
+					$importe3 = number_format(($importe * 1.15),"2",",",".");
+
+					if($d->debt->amount->concept_id == 1 && $d->debt->amount->ciclo_lectivo == 2019){
+						$fecha1_larga = date("30/12/Y",strtotime($d->debt->amount->fecha));
+						$fecha1_corta = date("3012y",strtotime($d->debt->amount->fecha));
+						$fecha2_larga = date("30/12/Y",strtotime($d->debt->amount->fecha));
+						$fecha2_corta = date("3012y",strtotime($d->debt->amount->fecha));
+						$importe2_barcode = $this->utils->importe_barcode($importe,5,2);
+						$importe2 = number_format($importe,"2",",",".");
+						$importe3_barcode = $this->utils->importe_barcode($importe,5,2);
+						$importe3 = number_format($importe,"2",",",".");												
+					}
+					$campo[] = $importe1_barcode;//campo 6 importe 1er vto 7 dig					
+					$campo[] = $fecha1_corta;//campo 7 Fecha 1er vto 6 dig
+					$array_importes['importe1'] = $importe1;
+					$array_fechas['fecha1'] = $fecha1_larga;
+					//$campo[] = date("1506y",strtotime($d->debt->amount->fecha));//campo 7 Fecha 1er vto 6 dig										
+					$campo[] = $importe2_barcode;//campo 8 Importe 2do vto
+					$campo[] = $fecha2_corta;//campo 9 Fecha 2do vto
+					//$campo[] = date("2006y",strtotime($d->debt->amount->fecha));;//campo 9 Fecha 2do vto
+					$array_importes['importe2'] = $importe2;
+					$array_fechas['fecha2'] = $fecha2_larga;
+					$campo[] = $importe3_barcode; //campo 10 Importe 3er vto					
+					$campo[] = $fecha3_corta;//campo 11 Fecha 3er vto
+					$array_importes['importe3'] = $importe3; 
 					//$array_fechas['fecha3'] = date($ultimo_dia."/m/Y",strtotime($d->debt->amount->fecha));
-					$array_fechas['fecha3'] = date("30/12/2018",strtotime($d->debt->amount->fecha));
+					$array_fechas['fecha3'] = $fecha3_larga;
 				/*}
 				else{
 					if($d->payment->fecha_reimpresion == ''){
@@ -1609,7 +1634,7 @@ class Pagos extends CI_Controller {
 					'pagoId' => $payment->id,
 				);
 				//print_r($data); die();
-				$this->ws_afip->prepare_request($data);
+				//$this->ws_afip->prepare_request($data);
 			}
 		}
 
@@ -1965,7 +1990,7 @@ class Pagos extends CI_Controller {
 							$pay->save();
 							//$pay = Payment::find(array('nro_comprobante'=>$insert['nro_comprobante']));
 							
-							$pagoid = $pay->id;
+							/*$pagoid = $pay->id;
 							$dni_ws = $pay->student->nro_documento;
 							
 							//WS AFIP
@@ -1979,7 +2004,7 @@ class Pagos extends CI_Controller {
 							if(!$this->ws_afip->prepare_request($data)){
 								$ban = false;
 								$error .= ' Error al guardar factura';
-							}
+							}*/
 						}
 						else{
 							$ban = false;
