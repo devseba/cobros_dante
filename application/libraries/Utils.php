@@ -21,6 +21,10 @@
 			return substr($fecha, 0,2).$c.substr($fecha, 2,2).$c.substr($fecha, 4,4);
 		}
 
+		function agregar_caracter_fecha2($fecha, $c){
+			return substr($fecha, 0,4).$c.substr($fecha, 4,2).$c.substr($fecha, 6,2);
+		}
+
 		/*
 		** Transforma el importe para el barcode
 		*/
@@ -172,6 +176,6 @@
 		}
 
 		function getPathRootProject(){
-			return $_SERVER['DOCUMENT_ROOT']."/cobros/";
+			return $_SERVER['DOCUMENT_ROOT']."/cobros_prueba/";
 		}
 	}

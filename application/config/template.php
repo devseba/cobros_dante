@@ -68,6 +68,10 @@ $template['recibo']['template'] = 'layouts/recibo';
 $template['recibo']['regions'] = array(
    'content'
 );
+$template['recibo_ws']['template'] = 'layouts/recibo_ws';
+$template['recibo_ws']['regions'] = array(
+   'content'
+);
 $template['reporte']['template'] = 'layouts/reporte';
 $template['reporte']['regions'] = array(
    'content'

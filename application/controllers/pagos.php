@@ -6,6 +6,8 @@ class Pagos extends CI_Controller {
 		parent::__construct();
 		//$this->output->enable_profiler(TRUE);
 		if(!$this->session->userdata('id')) redirect('auth/login');
+
+		$this->load->library('webservice/ws_afip');
 	}
 
 	public function index($offset = 0){
@@ -468,10 +470,14 @@ class Pagos extends CI_Controller {
 		$insert = array_merge($datos, $_POST);
 		//print_r($insert);
 		$insert['moneda']=isset($insert['moneda'])?$insert['moneda']:1; //Pesos
+		//obtengo el que viene por post		
+		$nro_comprobante = $insert['nro_comprobante'];
+		$array_nro_c = explode("-", $nro_comprobante);
+		$pto_venta = str_pad($array_nro_c[0],4,'0', STR_PAD_LEFT);
 		$nro_c = Payment::count(array('nro_comprobante'=>$insert['nro_comprobante']));
 		if($nro_c != 0){
 			$ultimo = Payment::last(array('order'=>'id ASC',
-									'conditions'=>array('nro_comprobante LIKE ?','0001-%')))->nro_comprobante;
+									'conditions'=>array('nro_comprobante LIKE ?',$pto_venta.'-%')))->nro_comprobante;
 			$nuevo = explode('-',$ultimo);
 			$insert['nro_comprobante'] = $nuevo[0].'-'.str_pad(($nuevo[1] + 1), 8, '0', STR_PAD_LEFT);
 			$nuevo[1] = str_pad(($nuevo[1] + 1), 8, '0', STR_PAD_LEFT);
@@ -480,7 +486,8 @@ class Pagos extends CI_Controller {
 			$nuevo = explode('-',$insert['nro_comprobante']);
 			$insert['nro_comprobante'] = $nuevo[0].'-'.str_pad(($nuevo[1]), 8, '0', STR_PAD_LEFT);			
 		}
-				
+		
+
 		$i = Payment::connection();
 		try{
 			$i->transaction();
@@ -558,6 +565,18 @@ class Pagos extends CI_Controller {
 		
 			$this->session->set_flashdata('msg','<div class="success">El pago se realizó correctamente.</div>');
 			$i->commit();
+
+			//WS AFIP
+			$pago = Payment::find($pagoid);
+
+			$data = array(
+				'dnitutor' => $pago->student->nro_documento,
+				'total' => $pago->importe,
+				'fecha' => date('Y-m-d'),
+				'pagoId' => $pagoid,
+			);
+			$this->ws_afip->prepare_request($data);
+			
 			
 			$this->session->unset_userdata('pago');
 						
@@ -686,9 +705,13 @@ class Pagos extends CI_Controller {
 		$cell = array('data' => '<strong>TOTAL</strong>', 'colspan' => 4);
 		$this->table->add_row($cell, '$'.$t);
 		$data['tabla'] = $this->table->generate();
+
+		//Recibo Electronico
+		$cd = array('conditions' => array('payment_id = ?', $pagoid));		
+		$data['recibo'] = Factura::find($cd);		
 		
-		$this->template->set_template('recibo');
-		$this->template->write_view('content', 'pagos/recibo',$data);
+		$this->template->set_template('recibo_ws');
+		$this->template->write_view('content', 'pagos/recibo_ws',$data);
 		$this->template->render();
 	}
 		
@@ -753,15 +776,28 @@ class Pagos extends CI_Controller {
 	function eliminar($id){
 		try{
 			$a = Payment::find($id);
-			$a->user_id = $this->session->userdata('id');
-			$a->anulado = 1;
-			$a->fecha_anulado = date('Y-m-d');
-			foreach($a->debt as $d){
-				$d->pagado = 0;
-				$d->save();
+			
+			//WS AFIP
+			$data = array(
+				'pagoId' => $id,
+				'dnitutor' => $a->student->nro_documento,
+			);
+
+			$ws_result = $this->ws_afip->prepare_request_nc($data);
+
+			if($ws_result){
+				$a->user_id = $this->session->userdata('id');
+				$a->anulado = 1;
+				$a->fecha_anulado = date('Y-m-d');
+				foreach($a->debt as $d){
+					$d->pagado = 0;
+					$d->save();
+				}
+				$a->save();
+
+				$this->session->set_flashdata('msg','<div class="success">El pago fué anulado.</div>');
 			}
-			$a->save();
-			$this->session->set_flashdata('msg','<div class="success">El pago fué anulado.</div>');
+			else $this->session->set_flashdata('msg','<div class="error">El pago no fué anulado (comprobante NO autorizado por AFIP).</div>');
 		}
 		catch( \Exception $e){
 			$this->session->set_flashdata('msg','<div class="error">El pago no fué anulado.</div>');
@@ -1222,7 +1258,7 @@ class Pagos extends CI_Controller {
 					$array_fechas['fecha2'] = date("25/m/Y",strtotime($d->debt->amount->fecha));
 
 					$campo[] = $this->utils->importe_barcode($importe * 1.15,5,2);//campo 10 Importe 3er vto					
-					$campo[] = date($ultimo_dia."my",strtotime($d->debt->amount->fecha));//campo 11 Fecha 3er vto
+					$campo[] = date("3012y",strtotime($d->debt->amount->fecha));//campo 11 Fecha 3er vto
 					$array_importes['importe3'] = number_format(($importe * 1.15),"2",",",".");
 					//$array_fechas['fecha3'] = date($ultimo_dia."/m/Y",strtotime($d->debt->amount->fecha));
 					$array_fechas['fecha3'] = date("30/12/2018",strtotime($d->debt->amount->fecha));
@@ -1564,6 +1600,16 @@ class Pagos extends CI_Controller {
 			}
 			else{
 				$this->db->trans_commit();
+
+				//WS AFIP
+				$data = array(
+					'dnitutor' => $payment->student->nro_documento,
+					'total' => $importe,
+					'fecha' => date('Y-m-d'),
+					'pagoId' => $payment->id,
+				);
+				//print_r($data); die();
+				$this->ws_afip->prepare_request($data);
 			}
 		}
 
@@ -1716,6 +1762,8 @@ class Pagos extends CI_Controller {
 				$file["error"] = 1;
 				$file["msg"] = "Archivo duplicado. No se puede subir un archivo existente.";
 				$file["file"] = $nombre_fichero;
+				//$conditions = array('conditions' => 'name LIKE "'.basename($_FILES["file"]["name"]).'"');
+				//$file_id = File::find($conditions)->id;
 				$update_file = 1;
 			}
 			else{
@@ -1846,6 +1894,7 @@ class Pagos extends CI_Controller {
 		$debtid = 0;
 		$error = "";
 
+
 		try{
 			$this->db->trans_begin();//inicio la transaccion
 			$user = User::find(
@@ -1878,76 +1927,100 @@ class Pagos extends CI_Controller {
 				$valores["codigo_link"] = $value["id_deuda"].$value["id_concepto"].$value["id_usuario"].'%';
 				$conditions = array_merge(array($condiciones), $valores);
 				$debt = Debt::find(array('conditions' => $conditions));
-				$debtid = $debt->id;
-				$debt->update_attributes(array('estado_pago_link' => 2, 
-					'pagado' => 1, 
-					'importe' => $insert['importe']));
-				if($debt->is_valid()){
-					$debt->save();					
+				//si no existe debt
+				if(!$debt){
+					//print_r($condiciones);
 				}
 				else{
-					$ban = false;
-					$error .= " Error al actualizar el estado de la Deuda.";
-				}
+					$debtid = $debt->id;
+					//if($debt->pagado == 0){
+					if(true){
+						$debt->update_attributes(array('estado_pago_link' => 2, 
+							'pagado' => 1, 
+							'importe' => $insert['importe']));
+						if($debt->is_valid()){
+							$debt->save();					
+						}
+						else{
+							$ban = false;
+							$error .= " Error al actualizar el estado de la Deuda.";
+						}
 
-				$insert['student_id'] = $debt->student_id;
-				$insert['observaciones'] = "Pagos link";
+						$insert['student_id'] = $debt->student_id;
+						$insert['observaciones'] = "Pagos link";
 
-				$payment = array(
-						'student_id'=>$insert['student_id'],
-						'user_id'=>$insert['user_id'],
-						'nro_comprobante'=>$insert['nro_comprobante'],
-						'fecha'=>$insert['fecha'],
-						'moneda'=>$insert['moneda'],
-						'importe'=>$insert['importe'],
-						'observaciones'=>$insert['observaciones'],
-						'related_payments'=>$insert['related_payments'],
-						'nro_recibo'=>$insert['nro_recibo'],
-						'pto_venta'=>$insert['pto_venta']);
-				$pay = new Payment($payment);
-				if($pay->is_valid()){
-					$pay->save();
-					$pay = Payment::find(array('nro_comprobante'=>$insert['nro_comprobante']));
-					$pagoid = $pay->id;
-				}
-				else{
-					$ban = false;
-					$error .= " Error al guardar Pago.";
-				}
-				//Armo la cadena con IDs de pagos
-				$string_pagosid .= $pagoid."-";
-				$insert['pago'][$debt->id] = $pagoid;		
-				$detalle = array('debt_id' => $debt->id, 
-					'payment_id' => $pagoid , 
-					'importe' => $importe, 
-					'estado' => 1,
-					'file_extract_id' => $file_id);
-				$d = new Detail($detalle);
-
-				if($d->is_valid()){
-					$d->save();
-				}
-				else{
-					$ban = false;
-					$error .= " Error al guardar Detail.";
-				}
-
-				//Forma de pagos
-				foreach($insert['ptype_id'] as $j=>$v){
-					$det = array(
-							'payment_id'=>$pagoid,
-							'ptype_id'=>$v,
-							'importe'=>$insert['importe']
+						$payment = array(
+								'student_id'=>$insert['student_id'],
+								'user_id'=>$insert['user_id'],
+								'nro_comprobante'=>$insert['nro_comprobante'],
+								'fecha'=>$insert['fecha'],
+								'moneda'=>$insert['moneda'],
+								'importe'=>$insert['importe'],
+								'observaciones'=>$insert['observaciones'],
+								'related_payments'=>$insert['related_payments'],
+								'nro_recibo'=>$insert['nro_recibo'],
+								'pto_venta'=>$insert['pto_venta']);
+						$pay = new Payment($payment);
+						if($pay->is_valid()){
+							$pay->save();
+							//$pay = Payment::find(array('nro_comprobante'=>$insert['nro_comprobante']));
+							
+							$pagoid = $pay->id;
+							$dni_ws = $pay->student->nro_documento;
+							
+							//WS AFIP
+							$data = array(
+								'dnitutor' => $dni_ws,
+								'total' => (float)$insert['importe'],
+								'fecha' => date('Y-m-d'),
+								'pagoId' => $pagoid,
 							);
-									
-					$pdetail = new Pdetail($det);
-					if( $pdetail->is_valid( ) ){
-						$pdetail->save();
-					}
-					else{
-						$ban = false;
-						$error .= " Error al guardar Pdetail.";
-					}
+
+							if(!$this->ws_afip->prepare_request($data)){
+								$ban = false;
+								$error .= ' Error al guardar factura';
+							}
+						}
+						else{
+							$ban = false;
+							$error .= " Error al guardar Pago.";
+						}
+						//Armo la cadena con IDs de pagos
+						$string_pagosid .= $pagoid."-";
+						$insert['pago'][$debt->id] = $pagoid;		
+						$detalle = array('debt_id' => $debt->id, 
+							'payment_id' => $pagoid , 
+							'importe' => $importe, 
+							'estado' => 1,
+							'file_extract_id' => $file_id);
+						$d = new Detail($detalle);
+
+						if($d->is_valid()){
+							$d->save();
+						}
+						else{
+							$ban = false;
+							$error .= " Error al guardar Detail.";
+						}
+
+						//Forma de pagos
+						foreach($insert['ptype_id'] as $j=>$v){
+							$det = array(
+									'payment_id'=>$pagoid,
+									'ptype_id'=>$v,
+									'importe'=>$insert['importe']
+									);
+											
+							$pdetail = new Pdetail($det);
+							if( $pdetail->is_valid( ) ){
+								$pdetail->save();
+							}
+							else{
+								$ban = false;
+								$error .= " Error al guardar Pdetail.";
+							}
+						}
+					}					
 				}			
 			}
 			//saco el ultimo caracter al string de id pagos

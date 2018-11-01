@@ -1,0 +1,53 @@
+<soapenv:Envelope
+						xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+						xmlns:ar="http://ar.gov.afip.dif.FEV1/">
+						 <soapenv:Header/>
+						 <soapenv:Body>
+						 <ar:FECAESolicitar>
+							  <ar:Auth>
+	            	<ar:Token>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9InllcyI/Pgo8c3NvIHZlcnNpb249IjIuMCI+CiAgICA8aWQgc3JjPSJDTj13c2FhLCBPPUFGSVAsIEM9QVIsIFNFUklBTE5VTUJFUj1DVUlUIDMzNjkzNDUwMjM5IiBkc3Q9IkNOPXdzZmUsIE89QUZJUCwgQz1BUiIgdW5pcXVlX2lkPSIxOTQ3NTU4MTA2IiBnZW5fdGltZT0iMTU0MDkyODY4MSIgZXhwX3RpbWU9IjE1NDA5NzE5NDEiLz4KICAgIDxvcGVyYXRpb24gdHlwZT0ibG9naW4iIHZhbHVlPSJncmFudGVkIj4KICAgICAgICA8bG9naW4gZW50aXR5PSIzMzY5MzQ1MDIzOSIgc2VydmljZT0id3NmZSIgdWlkPSJTRVJJQUxOVU1CRVI9Q1VJVCAzMDUxODk2NzAwOSwgQ049ZGFudGVfd3NmZSIgYXV0aG1ldGhvZD0iY21zIiByZWdtZXRob2Q9IjIyIj4KICAgICAgICAgICAgPHJlbGF0aW9ucz4KICAgICAgICAgICAgICAgIDxyZWxhdGlvbiBrZXk9IjMwNTE4OTY3MDA5IiByZWx0eXBlPSI0Ii8+CiAgICAgICAgICAgIDwvcmVsYXRpb25zPgogICAgICAgIDwvbG9naW4+CiAgICA8L29wZXJhdGlvbj4KPC9zc28+Cg==</ar:Token>
+	      			<ar:Sign>INK2HBmE8BrxUX3BAmMAVfuBd5gsWF/j4ykptQglru69O1Y0AgHviw0zlelSIUm81qCqVQwoROOlpcGH/REaJlX8zmzTf8UxD6GzPcDoOjCo1znbSU4MmKkxpbYkk+z5snT6tfuYlG3pftUiJt/LIcypnPQ+WxQpqMrZP9JXgKE=</ar:Sign>
+	      			<ar:Cuit>30518967009</ar:Cuit>
+	        	</ar:Auth>
+	        
+							 <ar:FeCAEReq>
+								 <ar:FeCabReq>
+									 <ar:CantReg>1</ar:CantReg>
+									 <ar:PtoVta>4</ar:PtoVta>
+									 <ar:CbteTipo>15</ar:CbteTipo>
+								 </ar:FeCabReq>
+								 <ar:FeDetReq>
+									 <ar:FECAEDetRequest>
+										 <ar:Concepto>2</ar:Concepto>
+										 <ar:DocTipo>96</ar:DocTipo>
+										 <ar:DocNro>45263466</ar:DocNro>
+
+										 <ar:CbteDesde>15</ar:CbteDesde> 
+										 <ar:CbteHasta>15</ar:CbteHasta>
+										 <ar:CbteFch>20181030</ar:CbteFch>
+										 						 
+										 <ar:ImpTotal>1.00</ar:ImpTotal>
+										 <ar:ImpTotConc>0</ar:ImpTotConc>
+										
+										 <ar:ImpNeto>1.00</ar:ImpNeto>
+										 <ar:ImpOpEx>0</ar:ImpOpEx>
+
+										 <ar:ImpIVA>0</ar:ImpIVA>
+
+										 
+							 <ar:FchServDesde>20181001</ar:FchServDesde>
+							 <ar:FchServHasta>20181031</ar:FchServHasta>
+							 <ar:FchVtoPago>20181031</ar:FchVtoPago>
+									 
+
+										 <ar:MonId>PES</ar:MonId>
+										 <ar:MonCotiz>1</ar:MonCotiz>
+										
+									 </ar:FECAEDetRequest>
+								 </ar:FeDetReq>
+							 </ar:FeCAEReq>
+
+						</ar:FECAESolicitar>
+					</soapenv:Body>
+				</soapenv:Envelope>
+									

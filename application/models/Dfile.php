@@ -1,6 +1,6 @@
 <?php 
 
-	class File extends ActiveRecord\Model
+	class Dfile extends ActiveRecord\Model
 	{
 		static $has_many = array(
 

@@ -1351,7 +1351,7 @@ class Deudas extends CI_Controller {
 		if($condiciones!='')
 			$condiciones .= ' AND ';
 		$condiciones.= "estado_pago_link = ?";
-		$valores['estado_pago_link'] = 0;	
+		$valores['estado_pago_link'] = 0;
 		
 		$this->session->set_userdata('fs_deudas', $valores);
 		
@@ -1362,7 +1362,8 @@ class Deudas extends CI_Controller {
 				  LEFT JOIN concepts ON concepts.id = amounts.concept_id
 				  LEFT JOIN courses ON courses.id = amounts.course_id
 				  LEFT JOIN families ON families.student_id = students.id
-				  LEFT JOIN tutors ON tutors.id = families.tutor_id';
+				  LEFT JOIN tutors ON tutors.id = families.tutor_id
+				  JOIN dfiles ON dfiles.debt_id = debts.id';
 		
 		
 		$todos = Debt::all(array('joins'=>$joins,'conditions' => $conditions, 'group'=>'concepts.id, students.id'));
@@ -1407,7 +1408,7 @@ class Deudas extends CI_Controller {
 			$this->table->set_heading('Fecha', 'Estudiante', 'Concepto','Curso','Importe');
 			foreach($deudas as $deuda){
 				$joins = 'JOIN payments ON payments.id = details.payment_id';
-				$pagado = Detail::all(array('joins' => $joins, 'conditions'=>array('debt_id = ? AND payments.anulado <> ?',$deuda->id,1)));
+				$pagado = Detail::all(array('joins' => $joins, 'conditions'=>array('debt_id = ? AND payments.anulado <> ? AND estado = ?',$deuda->id,1,1)));
 				$pago =0;
 				foreach($pagado as $p){
 					$pago += $p->importe;
@@ -1448,7 +1449,7 @@ class Deudas extends CI_Controller {
 		//obtengo la raiz del proyecto para establecer la ruta de los archivos
         $raiz = $this->utils->getPathRootProject();
         $ruta_archivos = $raiz."files/link/";
-        $num_volumen = 9;
+        $num_volumen = 1;
 		//Obtenemos el dia actual
 		$dia = date("d");
 		//Formamos el nombre del archivo
@@ -1637,7 +1638,7 @@ class Deudas extends CI_Controller {
 			$registros = "";
 			foreach($deudas as $deuda){
 				$joins = 'JOIN payments ON payments.id = details.payment_id';
-				$pagado = Detail::all(array('joins' => $joins, 'conditions'=>array('debt_id = ? AND payments.anulado <> ?',$deuda->id,1)));
+				$pagado = Detail::all(array('joins' => $joins, 'conditions'=>array('debt_id = ? AND payments.anulado <> ? AND estado = ?',$deuda->id,1,1)));
 				$pago =0;
 				foreach($pagado as $p){
 					$pago += $p->importe;
@@ -1663,7 +1664,7 @@ class Deudas extends CI_Controller {
 					$debe = $imp_deuda-$pago;
 					if($debe > 0){
 						//$id_deuda = str_pad($deuda->id, 5, "0", STR_PAD_LEFT);
-						$id_deuda = date("0my",strtotime($deuda->amount->fecha));
+						$id_deuda = date("5my",strtotime($deuda->amount->fecha));
 						$id_usuario = $deuda->student->id;
 						$id_usuario = str_replace(".", "", $id_usuario);
 						$id_usuario = str_replace(" ", "", $id_usuario);
@@ -1693,6 +1694,8 @@ class Deudas extends CI_Controller {
 								$fecha3.
 								$importe3.
 								$otro;
+						//En un principio pense el codigo de pago link se formaba asi pero no, igual
+						//me sirve para validar si es unico.
 						$cod_pago_link = $id_deuda.$id_concepto.$id_usuario;
 						//me fijo si ya esta la cadena "id_deuda+id_concepto+id_usuario" en el archivo
 						$pos = strpos($registros, $cod_pago_link);
@@ -1702,7 +1705,7 @@ class Deudas extends CI_Controller {
 								$pos = true;
 							}
 						}
-						$num = 1;
+						$num = 4;
 						while ($pos != false) {
 							echo $id_deuda."<br>";
 							//vuelvo a crear el id de deuda

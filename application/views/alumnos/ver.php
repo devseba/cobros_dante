@@ -91,7 +91,13 @@
 			<?=$deudas?>
 			<div class="forms">
 				<?=form_label('Alterar nro comprobante','nro_comprobante')?>
-				<?=form_input(array('name' => 'nro_comprobante', 'value' => $nro_comprobante, 'id' => 'nro_comprobante'))?>
+				<?//=form_input(array('name' => 'nro_comprobante', 'value' => $nro_comprobante, 'id' => 'nro_comprobante'))?>
+				<?
+					$comprobantes = array();
+					$comprobantes[$nro_comprobante] = $nro_comprobante;
+					$comprobantes[$nro_comprobante2] = $nro_comprobante2;
+				?>
+				<?=form_dropdown('nro_comprobante', $comprobantes, '', 'id="nro_comprobante"')?>				
 			</div>
 			<p><?=form_submit('ptypes/agregar_detalle', 'Seleccione las cuotas a pagar','class="button" id="total" disabled')?></p>
 			<?=form_close()?>

@@ -8,6 +8,30 @@ class Niveles extends CI_Controller {
 	}
 
 	public function index($offset = 0){
+
+
+		//$this->load->library('webservice/ws_afip');
+
+		/*$data = array(
+			'dnitutor' => '54719111',
+			'total' => 0.01,
+			'fecha' => date('Y-m-d'),
+			'pagoId' => 3,
+		);
+		$this->ws_afip->prepare_request($data);*/
+
+		/*$data = array(
+			'dnitutor' => '32689887',
+			'total' => 0.15,
+			'facturaId' => 6,
+			'puntoVasoc' => 4,
+			'numFactAsoc' => 6,
+		);
+		$this->ws_afip->prepare_request_nc($data);*/
+
+
+
+
 		if(!$offset)
 			$this->session->unset_userdata('filtros_niveles');
 			

@@ -417,23 +417,44 @@ class Alumnos extends CI_Controller {
 				
 				$saldo = 0;
 				$pagar = 0;
-				$pagar = ceil(($d->amount->importe - ($d->amount->importe*($descuento/100)))/5)*5;
+				//$pagar = ceil(($d->amount->importe - ($d->amount->importe*($descuento/100)))/5)*5;
+				$pagar = (($d->amount->importe - ($d->amount->importe*($descuento/100)))/5)*5;
 				$saldo = $pagar - $pagado - $pendiente;
 				$class_pend = ($pendiente > 0)?"pendiente":"";
 				if($this->session->userdata('grupo') == 'alumno'){
 					if($saldo > 0 || $ban == 1){
-						$this->table->add_row(
-							$d->id,
-							$d->amount->concept->concepto.' '.$d->amount->ciclo_lectivo,
-							$d->amount->fecha->format('d/m/Y'),
-							'$'.$d->amount->importe,
-							$descuento ? $descuento.'%' : 'No',
-							'$'.$pagar,
-							'$'.$pagado,
-							"<div class='".$class_pend."'>".'$'.$pendiente."</div>",
-							'$'.$saldo,
-							form_hidden('saldo['.$d->id.']', $saldo).' '.form_input(array('name' => 'parcial['.$d->id.']', 'class' => 'small', 'max' => $saldo, 'min' => 1,'readonly'=>'true')).' '.form_checkbox(array('name' => 'suma', 'class' => 'check', 'value' => $saldo))
-						);
+						$cuotas = $d->amount->cuotas;
+
+						if($cuotas > 1){						
+							for($i=0;$i < $cuotas;$i++){
+								$this->table->add_row(
+									$d->id,
+									$d->amount->concept->concepto.' '.$d->amount->ciclo_lectivo,
+									$d->amount->fecha->format('d/m/Y'),
+									'$'.$d->amount->importe/$cuotas,
+									$descuento ? $descuento.'%' : 'No',
+									'$'.$pagar/$cuotas,
+									'$'.$pagado,
+									"<div class='".$class_pend."'>".'$'.$pendiente."</div>",
+									'$'.$saldo/$cuotas,
+									form_hidden('saldo['.$d->id.']', $saldo).' '.form_input(array('name' => 'parcial['.$d->id.']', 'class' => 'small', 'max' => $saldo, 'min' => 1,'readonly'=>'true')).' '.form_checkbox(array('name' => 'suma', 'class' => 'check', 'value' => $saldo))
+								);							
+							}				
+						}
+						else{
+							$this->table->add_row(
+								$d->id,
+								$d->amount->concept->concepto.' '.$d->amount->ciclo_lectivo,
+								$d->amount->fecha->format('d/m/Y'),
+								'$'.$d->amount->importe,
+								$descuento ? $descuento.'%' : 'No',
+								'$'.$pagar,
+								'$'.$pagado,
+								"<div class='".$class_pend."'>".'$'.$pendiente."</div>",
+								'$'.$saldo,
+								form_hidden('saldo['.$d->id.']', $saldo).' '.form_input(array('name' => 'parcial['.$d->id.']', 'class' => 'small', 'max' => $saldo, 'min' => 1,'readonly'=>'true')).' '.form_checkbox(array('name' => 'suma', 'class' => 'check', 'value' => $saldo))
+							);							
+						}
 					}
 
 					if(!$ban_link){
@@ -441,9 +462,9 @@ class Alumnos extends CI_Controller {
 						$findme   = $codigo_link;
 						$pos = strpos($mystring, $findme);
 						//2 significa que el codigo link esta aceptado por pagos link
-						if ($pos != 0 && $d->estado_pago_link == 2) {
+						//if ($pos != 0 /*&& $d->estado_pago_link == 2*/) {
 							$ban_link = true;
-						}
+						//}
 					}
 				}
 				else{
@@ -683,13 +704,20 @@ class Alumnos extends CI_Controller {
 			
 			// Trae el último nro de comprobante y le suma 1
 			$nro = Payment::last(array('order'=>'nro_recibo ASC',
-												'conditions'=>array('nro_comprobante NOT LIKE ? AND YEAR(fecha) > ?','0002-%','2017')));
-			
+												'conditions'=>array('nro_comprobante NOT LIKE ? AND YEAR(fecha) > ?','0002-%','2017')));		
 			$data['nro_comprobante'] = '0001-00000000';
 			if($nro){
 				$nuevo = explode('-',$nro->nro_comprobante);
 				$data['nro_comprobante'] = $nuevo[0].'-'.str_pad(($nuevo[1] + 1), 8, '0', STR_PAD_LEFT);
 			}
+
+			$nro2 = Payment::last(array('order'=>'nro_recibo ASC',
+												'conditions'=>array('nro_comprobante LIKE ? AND YEAR(fecha) > ?','0003-%','2017')));
+			$data['nro_comprobante2'] = '0003-00000000';
+			if($nro2){
+				$nuevo = explode('-',$nro2->nro_comprobante);
+				$data['nro_comprobante2'] = $nuevo[0].'-'.str_pad(($nuevo[1] + 1), 8, '0', STR_PAD_LEFT);
+			}			
 			
 			$conditions = array('conditions' => array('student_id = ?', $id));
 			$pe = Inscription::last($conditions);
