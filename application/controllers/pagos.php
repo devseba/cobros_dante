@@ -7,7 +7,7 @@ class Pagos extends CI_Controller {
 		//$this->output->enable_profiler(TRUE);
 		if(!$this->session->userdata('id')) redirect('auth/login');
 
-		//$this->load->library('webservice/ws_afip');
+		$this->load->library('webservice/ws_afip');
 	}
 
 	public function index($offset = 0){
@@ -575,7 +575,7 @@ class Pagos extends CI_Controller {
 				'fecha' => date('Y-m-d'),
 				'pagoId' => $pagoid,
 			);
-			//$this->ws_afip->prepare_request($data);
+			$this->ws_afip->prepare_request($data);
 			
 			
 			$this->session->unset_userdata('pago');
@@ -783,9 +783,9 @@ class Pagos extends CI_Controller {
 				'dnitutor' => $a->student->nro_documento,
 			);
 
-			//$ws_result = $this->ws_afip->prepare_request_nc($data);
+			$ws_result = $this->ws_afip->prepare_request_nc($data);
 
-			//if($ws_result){
+			if($ws_result){
 				$a->user_id = $this->session->userdata('id');
 				$a->anulado = 1;
 				$a->fecha_anulado = date('Y-m-d');
@@ -796,8 +796,8 @@ class Pagos extends CI_Controller {
 				$a->save();
 
 				$this->session->set_flashdata('msg','<div class="success">El pago fué anulado.</div>');
-			//}
-			//else $this->session->set_flashdata('msg','<div class="error">El pago no fué anulado (comprobante NO autorizado por AFIP).</div>');
+			}
+			else $this->session->set_flashdata('msg','<div class="error">El pago no fué anulado (comprobante NO autorizado por AFIP).</div>');
 		}
 		catch( \Exception $e){
 			$this->session->set_flashdata('msg','<div class="error">El pago no fué anulado.</div>');
@@ -1634,7 +1634,7 @@ class Pagos extends CI_Controller {
 					'pagoId' => $payment->id,
 				);
 				//print_r($data); die();
-				//$this->ws_afip->prepare_request($data);
+				$this->ws_afip->prepare_request($data);
 			}
 		}
 
@@ -1990,7 +1990,7 @@ class Pagos extends CI_Controller {
 							$pay->save();
 							//$pay = Payment::find(array('nro_comprobante'=>$insert['nro_comprobante']));
 							
-							/*$pagoid = $pay->id;
+							$pagoid = $pay->id;
 							$dni_ws = $pay->student->nro_documento;
 							
 							//WS AFIP
@@ -2004,7 +2004,7 @@ class Pagos extends CI_Controller {
 							if(!$this->ws_afip->prepare_request($data)){
 								$ban = false;
 								$error .= ' Error al guardar factura';
-							}*/
+							}
 						}
 						else{
 							$ban = false;
