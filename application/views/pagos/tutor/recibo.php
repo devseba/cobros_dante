@@ -296,7 +296,7 @@
 		<div style='margin-top:30px;height: 210px' align='center' class='cuerpo'>
 			<div class='cab-barcode'>
 				<div class="cab-barcode-left">
-					<p><H1>RECIBO Nº:<?= $detalle[$key]["nro_recibo"]?></H1></p>
+					<p><H1>VOLANTE DE PAGO Nº:<?= $detalle[$key]["nro_recibo"]?></H1></p>
 					<br><br>
 					<p><?=$detalle[$key]["concepto"]?></p>
 				</div>
