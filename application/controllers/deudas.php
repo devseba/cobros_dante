@@ -1660,7 +1660,7 @@ class Deudas extends CI_Controller {
 
 				//escribir en el archivo
 				$id_concepto = $deuda->amount->concept->codigo_link;
-				if($id_concepto != null){
+				if($id_concepto != null && $id_concepto == '001'){
 					$debe = $imp_deuda-$pago;
 					if($debe > 0){
 						//$id_deuda = str_pad($deuda->id, 5, "0", STR_PAD_LEFT);
@@ -1674,7 +1674,7 @@ class Deudas extends CI_Controller {
 						$acum_1venc += $debe;
 						$importe1 = number_format($debe,"2","","");
 						$importe1 = str_pad($importe1, 12,"0",STR_PAD_LEFT);
-						$fecha2 = date("ym20",strtotime($deuda->amount->fecha));//Fecha 2er vto 6 dig
+						$fecha2 = date("ym25",strtotime($deuda->amount->fecha));//Fecha 2er vto 6 dig
 						$acum_2venc += ($debe * 1.10);
 						$importe2 = number_format($debe * 1.10,"2","","");
 						$importe2 = str_pad($importe2, 12,"0",STR_PAD_LEFT);

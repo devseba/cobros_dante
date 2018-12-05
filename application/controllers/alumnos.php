@@ -423,38 +423,18 @@ class Alumnos extends CI_Controller {
 				$class_pend = ($pendiente > 0)?"pendiente":"";
 				if($this->session->userdata('grupo') == 'alumno'){
 					if($saldo > 0 || $ban == 1){
-						$cuotas = $d->amount->cuotas;
-
-						if($cuotas > 1){						
-							for($i=0;$i < $cuotas;$i++){
-								$this->table->add_row(
-									$d->id,
-									$d->amount->concept->concepto.' '.$d->amount->ciclo_lectivo,
-									$d->amount->fecha->format('d/m/Y'),
-									'$'.$d->amount->importe/$cuotas,
-									$descuento ? $descuento.'%' : 'No',
-									'$'.$pagar/$cuotas,
-									'$'.$pagado,
-									"<div class='".$class_pend."'>".'$'.$pendiente."</div>",
-									'$'.$saldo/$cuotas,
-									form_hidden('saldo['.$d->id.']', $saldo).' '.form_input(array('name' => 'parcial['.$d->id.']', 'class' => 'small', 'max' => $saldo, 'min' => 1,'readonly'=>'true')).' '.form_checkbox(array('name' => 'suma', 'class' => 'check', 'value' => $saldo))
-								);							
-							}				
-						}
-						else{
-							$this->table->add_row(
-								$d->id,
-								$d->amount->concept->concepto.' '.$d->amount->ciclo_lectivo,
-								$d->amount->fecha->format('d/m/Y'),
-								'$'.$d->amount->importe,
-								$descuento ? $descuento.'%' : 'No',
-								'$'.$pagar,
-								'$'.$pagado,
-								"<div class='".$class_pend."'>".'$'.$pendiente."</div>",
-								'$'.$saldo,
-								form_hidden('saldo['.$d->id.']', $saldo).' '.form_input(array('name' => 'parcial['.$d->id.']', 'class' => 'small', 'max' => $saldo, 'min' => 1,'readonly'=>'true')).' '.form_checkbox(array('name' => 'suma', 'class' => 'check', 'value' => $saldo))
-							);							
-						}
+						$this->table->add_row(
+							$d->id,
+							$d->amount->concept->concepto.' '.$d->amount->ciclo_lectivo,
+							$d->amount->fecha->format('d/m/Y'),
+							'$'.$d->amount->importe,
+							$descuento ? $descuento.'%' : 'No',
+							'$'.$pagar,
+							'$'.$pagado,
+							"<div class='".$class_pend."'>".'$'.$pendiente."</div>",
+							'$'.$saldo,
+							form_hidden('saldo['.$d->id.']', $saldo).' '.form_input(array('name' => 'parcial['.$d->id.']', 'class' => 'small', 'max' => $saldo, 'min' => 1,'readonly'=>'true')).' '.form_checkbox(array('name' => 'suma', 'class' => 'check', 'value' => $saldo))
+						);
 					}
 
 					if(!$ban_link){
@@ -712,11 +692,19 @@ class Alumnos extends CI_Controller {
 			}
 
 			$nro2 = Payment::last(array('order'=>'nro_recibo ASC',
-												'conditions'=>array('nro_comprobante LIKE ? AND YEAR(fecha) > ?','0003-%','2017')));
-			$data['nro_comprobante2'] = '0003-00000000';
+												'conditions'=>array('nro_comprobante LIKE ? AND YEAR(fecha) > ?','0002-%','2017')));
+			$data['nro_comprobante2'] = '0002-00000000';
 			if($nro2){
 				$nuevo = explode('-',$nro2->nro_comprobante);
 				$data['nro_comprobante2'] = $nuevo[0].'-'.str_pad(($nuevo[1] + 1), 8, '0', STR_PAD_LEFT);
+			}	
+
+			$nro3 = Payment::last(array('order'=>'nro_recibo ASC',
+												'conditions'=>array('nro_comprobante LIKE ? AND YEAR(fecha) > ?','0003-%','2017')));
+			$data['nro_comprobante3'] = '0003-00000000';
+			if($nro3){
+				$nuevo = explode('-',$nro3->nro_comprobante);
+				$data['nro_comprobante3'] = $nuevo[0].'-'.str_pad(($nuevo[1] + 1), 8, '0', STR_PAD_LEFT);
 			}			
 			
 			$conditions = array('conditions' => array('student_id = ?', $id));

@@ -96,6 +96,7 @@
 					$comprobantes = array();
 					$comprobantes[$nro_comprobante] = $nro_comprobante;
 					$comprobantes[$nro_comprobante2] = $nro_comprobante2;
+					$comprobantes[$nro_comprobante3] = $nro_comprobante3;
 				?>
 				<?=form_dropdown('nro_comprobante', $comprobantes, '', 'id="nro_comprobante"')?>				
 			</div>
